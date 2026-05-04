@@ -1,84 +1,100 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "TheAuroraLegacyPawn.generated.h"
 
-UCLASS(Config=Game)
+UCLASS(Config = Game)
 class ATheAuroraLegacyPawn : public APawn
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-	/** StaticMesh component that will be the visuals for our flying pawn */
-	UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* PlaneMesh;
+    UPROPERTY(Category = Mesh, VisibleDefaultsOnly,
+        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    class UStaticMeshComponent* PlaneMesh;
 
-	/** Spring arm that will offset the camera */
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* SpringArm;
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly,
+        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    class USpringArmComponent* SpringArm;
 
-	/** Camera component that will be our viewpoint */
-	UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* Camera;
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly,
+        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    class UCameraComponent* Camera;
+
 public:
-	ATheAuroraLegacyPawn();
+    ATheAuroraLegacyPawn();
 
-	// Begin AActor overrides
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-	// End AActor overrides
+    virtual void Tick(float DeltaSeconds) override;
+    virtual void NotifyHit(class UPrimitiveComponent* MyComp,
+        class AActor* Other,
+        class UPrimitiveComponent* OtherComp,
+        bool bSelfMoved,
+        FVector HitLocation,
+        FVector HitNormal,
+        FVector NormalImpulse,
+        const FHitResult& Hit) override;
+
+    // ---- NUEVO: Disparo ----
+    UFUNCTION()
+    void Fire();
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSubclassOf<class APlayerProjectile> ProjectileClass;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float FireRate = 0.2f;
+
+    // ---- NUEVO: Vidas ----
+    UPROPERTY(EditAnywhere, BlueprintReadWrite,
+        Category = "Stats")
+    int32 Lives = 3;
+
+    UFUNCTION()
+    void TakeDamage_Ship(int32 DamageAmount);
+
+    int32 GetLives() const { return Lives; }
 
 protected:
+    virtual void SetupPlayerInputComponent(
+        class UInputComponent* InputComponent) override;
 
-	// Begin APawn overrides
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override; // Allows binding actions/axes to functions
-	// End APawn overrides
-
-	/** Bound to the thrust axis */
-	void ThrustInput(float Val);
-	
-	/** Bound to the vertical axis */
-	void MoveUpInput(float Val);
-
-	/** Bound to the horizontal axis */
-	void MoveRightInput(float Val);
+    void ThrustInput(float Val);
+    void MoveUpInput(float Val);
+    void MoveRightInput(float Val);
 
 private:
+    UPROPERTY(Category = Plane, EditAnywhere)
+    float Acceleration;
 
-	/** How quickly forward speed changes */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float Acceleration;
+    UPROPERTY(Category = Plane, EditAnywhere)
+    float TurnSpeed;
 
-	/** How quickly pawn can steer */
-	UPROPERTY(Category=Plane, EditAnywhere)
-	float TurnSpeed;
+    UPROPERTY(Category = Pitch, EditAnywhere)
+    float MaxSpeed;
 
-	/** Max forward speed */
-	UPROPERTY(Category = Pitch, EditAnywhere)
-	float MaxSpeed;
+    UPROPERTY(Category = Yaw, EditAnywhere)
+    float MinSpeed;
 
-	/** Min forward speed */
-	UPROPERTY(Category=Yaw, EditAnywhere)
-	float MinSpeed;
+    float CurrentForwardSpeed;
+    float CurrentYawSpeed;
+    float CurrentPitchSpeed;
+    float CurrentRollSpeed;
 
-	/** Current forward speed */
-	float CurrentForwardSpeed;
-
-	/** Current yaw speed */
-	float CurrentYawSpeed;
-
-	/** Current pitch speed */
-	float CurrentPitchSpeed;
-
-	/** Current roll speed */
-	float CurrentRollSpeed;
+    // ---- NUEVO: Variables internas de disparo ----
+    bool bCanFire = true;
+    FTimerHandle FireTimerHandle;
+    void ResetFire();
 
 public:
-	/** Returns PlaneMesh subobject **/
-	FORCEINLINE class UStaticMeshComponent* GetPlaneMesh() const { return PlaneMesh; }
-	/** Returns SpringArm subobject **/
-	FORCEINLINE class USpringArmComponent* GetSpringArm() const { return SpringArm; }
-	/** Returns Camera subobject **/
-	FORCEINLINE class UCameraComponent* GetCamera() const { return Camera; }
+    FORCEINLINE class UStaticMeshComponent* GetPlaneMesh()
+        const {
+        return PlaneMesh;
+    }
+    FORCEINLINE class USpringArmComponent* GetSpringArm()
+        const {
+        return SpringArm;
+    }
+    FORCEINLINE class UCameraComponent* GetCamera()
+        const {
+        return Camera;
+    }
 };
