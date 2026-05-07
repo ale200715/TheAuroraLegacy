@@ -3,6 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "PlayerProjectile.generated.h"
 
+
 UCLASS()
 class THEAURORALEGACY_API APlayerProjectile : public AActor
 {
