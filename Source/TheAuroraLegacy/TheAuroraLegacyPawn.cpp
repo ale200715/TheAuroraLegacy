@@ -194,14 +194,12 @@ void ATheAuroraLegacyPawn::TakeDamage_Ship(
 
     if (Lives <= 0)
     {
-        UE_LOG(LogTemp, Warning,
-            TEXT("Game Over - Sin vidas"));
+        UE_LOG(LogTemp, Warning, TEXT("Game Over - Sin vidas"));
         Destroy();
     }
     else
     {
-        UE_LOG(LogTemp, Warning,
-            TEXT("Vidas restantes: %d"), Lives);
+        UE_LOG(LogTemp, Warning, TEXT("Vidas restantes: %d"), Lives);
     }
 }
 

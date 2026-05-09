@@ -3,6 +3,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "UI/AuroraHUD.h"
 #include "TheAuroraLegacyGameMode.generated.h"
 
 UCLASS(MinimalAPI)

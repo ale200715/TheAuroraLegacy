@@ -10,6 +10,7 @@ ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
     PrimaryActorTick.bCanEverTick = true;
     DefaultPawnClass = ATheAuroraLegacyPawn::StaticClass();
+   
 }
 
 void ATheAuroraLegacyGameMode::BeginPlay()
