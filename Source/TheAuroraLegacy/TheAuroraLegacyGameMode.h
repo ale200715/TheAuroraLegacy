@@ -5,7 +5,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "UI/AuroraHUD.h"
 #include "UI/LoreWidget.h"
-//#include "UI/GameOverWidget.h"
+#include "UI/GameOverWidget.h"
 #include "TheAuroraLegacyGameMode.generated.h"
 
 UCLASS(MinimalAPI)
@@ -39,8 +39,8 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<class ULoreWidget> LoreWidgetClass;
 
-    //UPROPERTY(EditAnywhere, Category = "UI")
-    //TSubclassOf<class UGameOverWidget> GameOverWidgetClass;
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<class UGameOverWidget> GameOverWidgetClass;
 
 private:
     FTimerHandle SpawnTimerHandle;

@@ -5,6 +5,7 @@
 #include "EnemyBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/LoreWidget.h"
+#include "UI/GameOverWidget.h"
 #include "Engine/World.h"
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
@@ -40,6 +41,23 @@ void ATheAuroraLegacyGameMode::BeginPlay()
                     "No eran errores. Eran mensajes."),
                 NAME_None);
             TestLore->AddToViewport();
+        }
+    }
+    /*/
+    
+	//prueba para lo de la pantalla de game over
+    /*/
+    if (GameOverWidgetClass)
+    {
+        UGameOverWidget* TestGO =
+            CreateWidget<UGameOverWidget>(
+                GetWorld(), GameOverWidgetClass);
+        if (TestGO)
+        {
+            TestGO->SetupGameOver(
+                1, 1,
+                FName("FlyingExampleMap"));
+            TestGO->AddToViewport();
         }
     }
     /*/
