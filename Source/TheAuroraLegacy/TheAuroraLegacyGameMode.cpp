@@ -4,8 +4,8 @@
 #include "TheAuroraLegacyPawn.h"
 #include "EnemyBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/LoreWidget.h"
 #include "Engine/World.h"
-
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -25,6 +25,24 @@ void ATheAuroraLegacyGameMode::BeginPlay()
         SpawnInterval,
         true  // loop
     );
+	//prueba para el lore
+    /*/
+    if (LoreWidgetClass)
+    {
+        ULoreWidget* TestLore =
+            CreateWidget<ULoreWidget>(
+                GetWorld(), LoreWidgetClass);
+        if (TestLore)
+        {
+            TestLore->SetupLore(
+                TEXT("Año 2157. Las primeras señales "
+                    "llegaron como estática.\n"
+                    "No eran errores. Eran mensajes."),
+                NAME_None);
+            TestLore->AddToViewport();
+        }
+    }
+    /*/
 }
 
 void ATheAuroraLegacyGameMode::Tick(float DeltaTime)
