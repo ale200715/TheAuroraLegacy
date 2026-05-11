@@ -42,7 +42,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<class UGameOverWidget> GameOverWidgetClass;
 
-private:
+public:
     FTimerHandle SpawnTimerHandle;
     void SpawnEnemy();
 };

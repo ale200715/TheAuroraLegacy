@@ -27,7 +27,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
         true  // loop
     );
 	//prueba para el lore
-    /*/
+    /*
     if (LoreWidgetClass)
     {
         ULoreWidget* TestLore =
@@ -43,10 +43,10 @@ void ATheAuroraLegacyGameMode::BeginPlay()
             TestLore->AddToViewport();
         }
     }
-    /*/
+    */
     
 	//prueba para lo de la pantalla de game over
-    /*/
+    /*
     if (GameOverWidgetClass)
     {
         UGameOverWidget* TestGO =
@@ -60,7 +60,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
             TestGO->AddToViewport();
         }
     }
-    /*/
+    */
 }
 
 void ATheAuroraLegacyGameMode::Tick(float DeltaTime)
