@@ -5,7 +5,7 @@ AEnemyBase::AEnemyBase()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    // Ignorar colisión con el mundo para que no se atasque
+    // Ignorar colisiï¿½n con el mundo para que no se atasque
     SetActorEnableCollision(true);
 }
 
@@ -43,7 +43,7 @@ void AEnemyBase::TakeDamageEnemy(int32 DamageAmount)
 {
     Health -= DamageAmount;
 
-    UE_LOG(LogTemp, Warning, TEXT("Enemigo recibio daño. Vida restante: %d"), Health);
+    UE_LOG(LogTemp, Warning, TEXT("Enemigo recibio daï¿½o. Vida restante: %d"), Health);
 
     if (Health <= 0)
     {
