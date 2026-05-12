@@ -10,8 +10,6 @@ class THEAURORALEGACY_API ULoreWidget
     GENERATED_BODY()
 
 public:
-    // Configurar el texto y nivel siguiente
-    // antes de mostrar la pantalla
     void SetupLore(
         FString Text,
         FName NextLevelName);

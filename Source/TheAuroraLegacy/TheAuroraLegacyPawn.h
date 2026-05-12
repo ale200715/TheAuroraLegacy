@@ -33,7 +33,7 @@ public:
         FVector NormalImpulse,
         const FHitResult& Hit) override;
 
-    // ---- NUEVO: Disparo ----
+    //  Disparo 
     UFUNCTION()
     void Fire();
 
@@ -43,7 +43,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     float FireRate = 0.2f;
 
-    // ---- NUEVO: Vidas ----
+    // Vidas 
     UPROPERTY(EditAnywhere, BlueprintReadWrite,
         Category = "Stats")
     int32 Lives = 3;
@@ -79,7 +79,7 @@ private:
     float CurrentPitchSpeed;
     float CurrentRollSpeed;
 
-    // ---- NUEVO: Variables internas de disparo ----
+    // Variables internas de disparo
     bool bCanFire = true;
     FTimerHandle FireTimerHandle;
     void ResetFire();

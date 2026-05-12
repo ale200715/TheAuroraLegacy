@@ -19,7 +19,6 @@ APlayerProjectile::APlayerProjectile()
     CollisionSphere->OnComponentHit.AddDynamic(
         this, &APlayerProjectile::OnHit);
 
-    // La bala se destruye sola a los 3 segundos
     InitialLifeSpan = 3.f;
 }
 
@@ -32,7 +31,6 @@ void APlayerProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // Mover la bala hacia adelante
     FVector NewLocation = GetActorLocation() +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;

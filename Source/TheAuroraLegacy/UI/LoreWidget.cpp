@@ -13,7 +13,7 @@ void ULoreWidget::NativeConstruct()
             this, &ULoreWidget::OnContinueClicked);
     }
 
-    // Mostrar cursor para el botón
+    // para mostrar el cursor cursor 
     APlayerController* PC =
         GetWorld()->GetFirstPlayerController();
     if (PC)

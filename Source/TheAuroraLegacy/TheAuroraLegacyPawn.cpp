@@ -47,13 +47,12 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
     Acceleration = 500.f;
     TurnSpeed = 50.f;
     MaxSpeed = 4000.f;
-    MinSpeed = 500.f;
-    CurrentForwardSpeed = 500.f;
+    MinSpeed = 0.f;
+    CurrentForwardSpeed = 0.f;
 
     Lives = 3;
     bCanFire = true;
 
-    // Al final del constructor, después de bCanFire = true;
     static ConstructorHelpers::FClassFinder<APlayerProjectile>
         ProjectileBP(TEXT("/Game/Player/BP_PlayerProjectile"));
     if (ProjectileBP.Class != nullptr)
@@ -115,7 +114,7 @@ void ATheAuroraLegacyPawn::SetupPlayerInputComponent(
         IE_Pressed, this,
         &ATheAuroraLegacyPawn::Fire);
 }
-
+/*/
 void ATheAuroraLegacyPawn::ThrustInput(float Val)
 {
     bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
@@ -125,6 +124,27 @@ void ATheAuroraLegacyPawn::ThrustInput(float Val)
         (GetWorld()->GetDeltaSeconds() * CurrentAcc);
     CurrentForwardSpeed = FMath::Clamp(
         NewForwardSpeed, MinSpeed, MaxSpeed);
+}
+/*/
+
+void ATheAuroraLegacyPawn::ThrustInput(float Val)
+{
+    bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
+
+    if (bHasInput)
+    {
+        float CurrentAcc = Val * Acceleration;
+        float NewForwardSpeed = CurrentForwardSpeed +
+            (GetWorld()->GetDeltaSeconds() * CurrentAcc);
+        CurrentForwardSpeed = FMath::Clamp(
+            NewForwardSpeed, -MaxSpeed, MaxSpeed);
+    }
+    else
+    {
+        CurrentForwardSpeed = FMath::FInterpTo(
+            CurrentForwardSpeed, 0.f,
+            GetWorld()->GetDeltaSeconds(), 5.f);
+    }
 }
 
 void ATheAuroraLegacyPawn::MoveUpInput(float Val)
