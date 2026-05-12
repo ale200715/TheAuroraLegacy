@@ -4,7 +4,8 @@
 #include "EnemyBase.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AEnemyBase : public AActor
+class THEAURORALEGACY_API AEnemyBase
+    : public AActor
 {
     GENERATED_BODY()
 
@@ -32,7 +33,7 @@ public:
         Category = "Stats")
     float MoveSpeed = 300.f;
 
-    // Recibir daño
+    // Recibir daño del proyectil
     UFUNCTION()
     void TakeDamageEnemy(int32 DamageAmount);
 
@@ -41,4 +42,12 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+
+    // Cada enemigo implementa su propio
+    // movimiento sobreescribiendo esto
+    virtual void MoveEnemy(float DeltaTime);
+
+    // Qué pasa cuando muere
+    // Virtual para que cada fase personalice
+    virtual void OnDeath();
 };

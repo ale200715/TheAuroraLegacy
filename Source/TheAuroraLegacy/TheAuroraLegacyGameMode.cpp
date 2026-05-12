@@ -25,41 +25,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
         SpawnInterval,
         true  // loop
     );
-	//prueba para el lore
-    /*/
-    if (LoreWidgetClass)
-    {
-        ULoreWidget* TestLore =
-            CreateWidget<ULoreWidget>(
-                GetWorld(), LoreWidgetClass);
-        if (TestLore)
-        {
-            TestLore->SetupLore(
-                TEXT("Año 2157. Las primeras señales "
-                    "llegaron como estática.\n"
-                    "No eran errores. Eran mensajes."),
-                NAME_None);
-            TestLore->AddToViewport();
-        }
-    }
-    /*/
-    
-	//prueba para lo de la pantalla de game over
-    /*/
-    if (GameOverWidgetClass)
-    {
-        UGameOverWidget* TestGO =
-            CreateWidget<UGameOverWidget>(
-                GetWorld(), GameOverWidgetClass);
-        if (TestGO)
-        {
-            TestGO->SetupGameOver(
-                1, 1,
-                FName("FlyingExampleMap"));
-            TestGO->AddToViewport();
-        }
-    }
-    /*/
+	
 }
 
 void ATheAuroraLegacyGameMode::Tick(float DeltaTime)
@@ -92,4 +58,86 @@ void ATheAuroraLegacyGameMode::SpawnEnemy()
         EnemyClass, SpawnLocation, SpawnRotation);
 
     UE_LOG(LogTemp, Warning, TEXT("Enemigo spawneado!"));
+}
+void ATheAuroraLegacyGameMode::OnEnemyDefeated(
+    int32 ScoreValue)
+{ 
+   
+    EnemiesDefeated++;
+    AddScore(ScoreValue);
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Enemigos: %d / %d"),
+        EnemiesDefeated, EnemiesRequired);
+
+    CheckLevelComplete();
+  
+}
+void ATheAuroraLegacyGameMode::CheckLevelComplete()
+{
+    if (EnemiesDefeated >= EnemiesRequired)
+    {
+        UE_LOG(LogTemp, Warning,
+            TEXT("Nivel completado!"));
+
+        // Detener el spawner
+        GetWorldTimerManager().ClearTimer(
+            SpawnTimerHandle);
+
+        // Esperar 2 segundos y cargar siguiente
+        FTimerHandle CompleteTimer;
+        GetWorldTimerManager().SetTimer(
+            CompleteTimer,
+            this,
+            &ATheAuroraLegacyGameMode::LoadNextLevel,
+            2.f,
+            false);
+    }
+}
+
+void ATheAuroraLegacyGameMode::LoadNextLevel()
+{
+    if (NextLevelName != NAME_None)
+    {
+        UGameplayStatics::OpenLevel(
+            this, NextLevelName);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning,
+            TEXT("No hay siguiente nivel definido"));
+    }
+}
+
+void ATheAuroraLegacyGameMode::OnPlayerDeath()
+{
+    GetWorldTimerManager().ClearTimer(
+        SpawnTimerHandle);
+    ShowGameOver();
+}
+
+void ATheAuroraLegacyGameMode::ShowGameOver()
+{
+    if (!GameOverWidgetClass) return;
+
+    UGameOverWidget* GOWidget =
+        CreateWidget<UGameOverWidget>(
+            GetWorld(), GameOverWidgetClass);
+
+    if (GOWidget)
+    {
+        GOWidget->SetupGameOver(
+            1, 1,
+            FName(*GetWorld()->GetMapName()));
+        GOWidget->AddToViewport();
+
+        APlayerController* PC =
+            UGameplayStatics::GetPlayerController(
+                this, 0);
+        if (PC)
+        {
+            PC->SetShowMouseCursor(true);
+            PC->SetInputMode(FInputModeUIOnly());
+        }
+    }
 }

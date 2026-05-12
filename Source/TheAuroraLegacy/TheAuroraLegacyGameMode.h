@@ -1,5 +1,4 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -9,24 +8,36 @@
 #include "TheAuroraLegacyGameMode.generated.h"
 
 UCLASS(MinimalAPI)
-class ATheAuroraLegacyGameMode : public AGameModeBase
+class ATheAuroraLegacyGameMode
+    : public AGameModeBase
 {
     GENERATED_BODY()
 
 public:
     ATheAuroraLegacyGameMode();
-
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
-    // Puntuaci�n
+    // ---- PUNTUACION ----
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 Score = 0;
 
     UFUNCTION(BlueprintCallable, Category = "Stats")
     void AddScore(int32 Amount);
 
-    // Spawner de enemigos
+    // ---- CONTROL DE NIVEL ----
+    // Cuántos enemigos hay que matar
+    UPROPERTY(EditAnywhere, Category = "Level")
+    int32 EnemiesRequired = 5;
+
+    // Cuántos han muerto
+    int32 EnemiesDefeated = 0;
+
+    // Siguiente nivel a cargar
+    UPROPERTY(EditAnywhere, Category = "Level")
+    FName NextLevelName = NAME_None;
+
+    // ---- SPAWNER ----
     UPROPERTY(EditAnywhere, Category = "Spawner")
     TSubclassOf<class AEnemyBase> EnemyClass;
 
@@ -36,16 +47,23 @@ public:
     UPROPERTY(EditAnywhere, Category = "Spawner")
     float SpawnDistance = 3000.f;
 
+    // ---- UI ----
     UPROPERTY(EditAnywhere, Category = "UI")
     TSubclassOf<class ULoreWidget> LoreWidgetClass;
 
     UPROPERTY(EditAnywhere, Category = "UI")
-    TSubclassOf<class UGameOverWidget> GameOverWidgetClass;
+    TSubclassOf<class UGameOverWidget>
+        GameOverWidgetClass;
 
-public:
+    // ---- FUNCIONES ----
     FTimerHandle SpawnTimerHandle;
-    void SpawnEnemy();
-};
 
+    virtual void SpawnEnemy();
+    void OnEnemyDefeated(int32 ScoreValue);
+    void CheckLevelComplete();
+    void LoadNextLevel();
+    void OnPlayerDeath();
+    void ShowGameOver();
+};
 
 

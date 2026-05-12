@@ -1,11 +1,11 @@
 #include "EnemyBase.h"
+#include "../Core/GameFacade.h"
+#include "../TheAuroraLegacyGameMode.h"
 #include "Kismet/GameplayStatics.h"
 
 AEnemyBase::AEnemyBase()
 {
     PrimaryActorTick.bCanEverTick = true;
-
-    // Ignorar colisi�n con el mundo para que no se atasque
     SetActorEnableCollision(true);
 }
 
@@ -18,36 +18,68 @@ void AEnemyBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-    if (!PlayerPawn) return;
-
-    FVector EnemyLocation = GetActorLocation();
-    FVector PlayerLocation = PlayerPawn->GetActorLocation();
-
-    // Ignorar diferencia de altura
-    PlayerLocation.Z = EnemyLocation.Z;
-
-    FVector Direction = PlayerLocation - EnemyLocation;
-    Direction.Normalize();
-
-    // Rotar hacia el jugador
-    FRotator NewRotation = Direction.ToOrientationRotator();
-    SetActorRotation(NewRotation);
-
-    // Mover hacia el jugador en plano horizontal
-    FVector NewLocation = EnemyLocation + (Direction * MoveSpeed * DeltaTime);
-    SetActorLocation(NewLocation, false);
+    // Llamar al movimiento virtual
+    // Cada enemigo sobreescribe MoveEnemy
+    // con su propio comportamiento
+    if (IsAlive())
+    {
+        MoveEnemy(DeltaTime);
+    }
 }
 
-void AEnemyBase::TakeDamageEnemy(int32 DamageAmount)
+void AEnemyBase::MoveEnemy(float DeltaTime)
+{
+    // La base no hace nada
+    // Cada enemigo sobreescribe esto
+}
+
+void AEnemyBase::TakeDamageEnemy(
+    int32 DamageAmount)
 {
     Health -= DamageAmount;
 
-    UE_LOG(LogTemp, Warning, TEXT("Enemigo recibio da�o. Vida restante: %d"), Health);
+    UE_LOG(LogTemp, Warning,
+        TEXT("Enemigo recibio daño. "
+            "Vida restante: %d"), Health);
 
     if (Health <= 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Enemigo destruido!"));
-        Destroy();
+        OnDeath();
     }
+}
+
+void AEnemyBase::OnDeath()
+{
+    UE_LOG(LogTemp, Warning,
+        TEXT("Enemigo muerto. Puntos: %d"),
+        ScoreValue);
+
+    // 1. Notificar al GameFacade
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
+    {
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->NotifyEnemyDefeated(this);
+        }
+    }
+
+    // 2. Notificar al GameMode
+    ATheAuroraLegacyGameMode* GM =
+        Cast<ATheAuroraLegacyGameMode>(
+            GetWorld()->GetAuthGameMode());
+    if (GM)
+    {
+        GM->OnEnemyDefeated(ScoreValue);
+    }
+
+    // 3. Destruirse
+    Destroy();
 }
