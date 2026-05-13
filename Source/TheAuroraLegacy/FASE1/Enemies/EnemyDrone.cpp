@@ -1,32 +1,32 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "EnemyDrone.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
-#include "Engine/Engine.h"
+#include "../Pool/Phase1EnemyPool.h"
+#include "../Projectiles/EnemyProjectile.h"
 
 AEnemyDrone::AEnemyDrone()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> DroneMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
-    
+    EnemyMesh = CreateDefaultSubobject
+        <UStaticMeshComponent>(TEXT("DroneMesh"));
+    RootComponent = EnemyMesh;
+
+    static ConstructorHelpers::FObjectFinder
+        <UStaticMesh> DroneMeshAsset(
+            TEXT("/Engine/BasicShapes/Cube.Cube"));
+
     if (DroneMeshAsset.Succeeded())
     {
-        EnemyMesh->SetStaticMesh(DroneMeshAsset.Object);
-    }
-  
-    if (DroneMeshAsset.Succeeded() && EnemyMesh)
-    {
-        EnemyMesh->SetStaticMesh(DroneMeshAsset.Object);
-        // Le damos un color o escala para diferenciarlo de la esfera base
-        EnemyMesh->SetWorldScale3D(FVector(1.5f, 1.5f, 1.5f));
+        EnemyMesh->SetStaticMesh(
+            DroneMeshAsset.Object);
+        EnemyMesh->SetWorldScale3D(
+            FVector(0.5f, 0.5f, 0.5f));
     }
 
-    // Stats según la tabla de tu fase
     Health = 1;
     MoveSpeed = 350.f;
     ContactDamage = 1;
@@ -37,58 +37,129 @@ void AEnemyDrone::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Cachear jugador una sola vez
     CachePlayer();
 
-    // Fijar dirección de movimiento al inicio
-    // Línea recta hacia adelante
-    MoveDirection = GetActorForwardVector() * -1.f;
+    if (CachedPlayer.IsValid())
+    {
+        FVector Direction =
+            CachedPlayer->GetActorLocation() -
+            GetActorLocation();
+        Direction.Normalize();
+        MoveDirection = Direction;
+    }
+    else
+    {
+        MoveDirection =
+            GetActorForwardVector() * -1.f;
+    }
 
-    // Iniciar disparo periódico
-    GetWorldTimerManager().SetTimer( FireTimerHandle, this, &AEnemyDrone::FireProjectile, FireRate, true); // true = repetir
+    // NO buscar el pool aquí todavía
+    // Se busca justo antes de disparar
 
+    GetWorldTimerManager().SetTimer(
+        FireTimerHandle,
+        this,
+        &AEnemyDrone::FireProjectile,
+        FireRate,
+        true);
 }
+
 void AEnemyDrone::Tick(float DeltaTime)
 {
-    // Solo llamamos al padre. El padre llamará a MoveEnemy por nosotros.
     Super::Tick(DeltaTime);
 }
 
-
 void AEnemyDrone::MoveEnemy(float DeltaTime)
 {
-    float DistanciaVaiven = 600.f;
-    float VelocidadVaiven = 2.5f;
-
-    float Offset = FMath::Sin(GetWorld()->GetTimeSeconds() * VelocidadVaiven) * DistanciaVaiven;
-
-
-    FVector NewLocation = GetActorLocation() + (GetActorForwardVector() * Offset * DeltaTime);
+    FVector NewLocation = GetActorLocation() +
+        MoveDirection * MoveSpeed * DeltaTime;
 
     SetActorLocation(NewLocation);
+
+    // Si se aleja más de 3000 unidades 
+    // del jugador desactivarse
+    if (CachedPlayer.IsValid())
+    {
+        float Distance = FVector::Dist(
+            GetActorLocation(),
+            CachedPlayer->GetActorLocation());
+
+        if (Distance > 3000.f)
+        {
+            // Desactivar en lugar de destruir
+            // para que el pool lo reutilice
+            SetActorHiddenInGame(true);
+            SetActorTickEnabled(false);
+            SetActorEnableCollision(false);
+            GetWorldTimerManager().ClearTimer(
+                FireTimerHandle);
+
+            UE_LOG(LogTemp, Warning,
+                TEXT("Drone: Salio del rango "
+                    "y se desactivo"));
+        }
+    }
 }
+
 void AEnemyDrone::FireProjectile()
 {
-    if (!CachedPlayer.IsValid())
+    if (!LevelPool)
     {
-        CachePlayer();
-        return;
+        AActor* FoundActor =
+            UGameplayStatics::GetActorOfClass(
+                GetWorld(),
+                APhase1EnemyPool::StaticClass());
+        LevelPool = Cast<APhase1EnemyPool>(FoundActor);
     }
 
+    if (!LevelPool) return;
+
+    AEnemyProjectile* Bullet =
+        LevelPool->GetProjectileFromPool();
+
+    if (!Bullet) return;
+
+    FVector SpawnLocation = GetActorLocation() +
+        GetActorForwardVector() * 100.f;
+
+    FRotator ShootRotation = GetActorRotation();
+    if (CachedPlayer.IsValid())
+    {
+        FVector Direction =
+            CachedPlayer->GetActorLocation() -
+            GetActorLocation();
+        Direction.Normalize();
+        ShootRotation = Direction.Rotation();
+    }
+
+    Bullet->SetActorLocation(SpawnLocation);
+    Bullet->SetActorRotation(GetActorRotation());
+    Bullet->SetActorHiddenInGame(false);
+    Bullet->SetActorTickEnabled(true);
+    Bullet->SetActorEnableCollision(true);
+
+    // Auto-desactivar después de 3 segundos
+    // si no golpea nada
+    FTimerHandle DeactivateTimer;
+    FTimerDelegate DeactivateDelegate;
+    DeactivateDelegate.BindUObject(
+        Bullet,
+        &AEnemyProjectile::DeactivateSelf);
+
+    GetWorldTimerManager().SetTimer(
+        DeactivateTimer,
+        DeactivateDelegate,
+        3.f,
+        false);
+
     UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Disparando"));
-
-   
+        TEXT("Drone: Proyectil disparado"));
 }
-
 void AEnemyDrone::CachePlayer()
 {
     APawn* Player =
         UGameplayStatics::GetPlayerPawn(
             GetWorld(), 0);
-
     if (Player)
-    {
         CachedPlayer = Player;
-    }
 }
