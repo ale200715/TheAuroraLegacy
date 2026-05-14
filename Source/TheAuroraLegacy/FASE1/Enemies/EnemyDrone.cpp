@@ -26,11 +26,17 @@ AEnemyDrone::AEnemyDrone()
         EnemyMesh->SetWorldScale3D(
             FVector(0.5f, 0.5f, 0.5f));
     }
+   
+    EnemyMesh->SetCollisionEnabled(
+        ECollisionEnabled::QueryAndPhysics);
+    EnemyMesh->SetCollisionProfileName(
+        TEXT("BlockAll"));
 
     Health = 1;
     MoveSpeed = 350.f;
     ContactDamage = 1;
     ScoreValue = 100;
+
 }
 
 void AEnemyDrone::BeginPlay()
