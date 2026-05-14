@@ -6,6 +6,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "../Pool/Phase1EnemyPool.h"
 #include "../Projectiles/EnemyProjectile.h"
+#include "../Core/GameFacade.h"
+#include "../TheAuroraLegacyGameMode.h"
 
 AEnemyDrone::AEnemyDrone()
 {
@@ -162,4 +164,44 @@ void AEnemyDrone::CachePlayer()
             GetWorld(), 0);
     if (Player)
         CachedPlayer = Player;
+}
+
+void AEnemyDrone::OnDeath()
+{
+    UE_LOG(LogTemp, Warning,
+        TEXT("Drone muerto - regresando al pool"));
+
+    // Notificar al Facade y GameMode
+    // igual que EnemyBase pero SIN destruir
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
+    {
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+            Facade->NotifyEnemyDefeated(this);
+    }
+
+    ATheAuroraLegacyGameMode* GM =
+        Cast<ATheAuroraLegacyGameMode>(
+            GetWorld()->GetAuthGameMode());
+    if (GM)
+        GM->OnEnemyDefeated(ScoreValue);
+
+    // Desactivar en lugar de destruir
+    // para regresar al pool
+    SetActorHiddenInGame(true);
+    SetActorTickEnabled(false);
+    SetActorEnableCollision(false);
+    SetActorLocation(FVector::ZeroVector);
+    GetWorldTimerManager().ClearTimer(
+        FireTimerHandle);
+
+    // Restaurar vida para cuando se reactive
+    Health = 1;
 }

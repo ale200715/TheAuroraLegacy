@@ -11,7 +11,7 @@
 AGameMode_Level1::AGameMode_Level1()
 {
     // Configuración del nivel 1
-    EnemiesRequired = 15;
+   EnemiesRequired = 15;
     SpawnInterval = 3.f;
     SpawnDistance = 800.f;
 

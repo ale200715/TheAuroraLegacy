@@ -1,16 +1,19 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
+
 #include "CoreMinimal.h"
-#include "TheAuroraLegacy/Enemies/EnemyBase.h"
-#include "EnemyDrone.generated.h"
+#include "../Enemies/EnemyBase.h"
+#include "EnemyHunter.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AEnemyDrone
+class THEAURORALEGACY_API AEnemyHunter
     : public AEnemyBase
 {
     GENERATED_BODY()
 
 public:
-    AEnemyDrone();
+    AEnemyHunter();
     virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -20,13 +23,18 @@ protected:
     virtual void BeginPlay() override;
     virtual void MoveEnemy(float DeltaTime) override;
     virtual void OnDeath() override;
+
     class APhase1EnemyPool* LevelPool;
     FTimerHandle FireTimerHandle;
-    float FireRate = 2.0f;
+    FTimerHandle BurstTimerHandle;
+    float FireRate = 1.5f;
+    int32 BurstCount = 0;
+    int32 BurstMax = 2;
 
 private:
-    FVector MoveDirection;
-    void FireProjectile();
     TWeakObjectPtr<APawn> CachedPlayer;
     void CachePlayer();
+    void StartBurst();
+    void FireBurst();
+    void FindPool();
 };
