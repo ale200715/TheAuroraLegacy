@@ -45,22 +45,7 @@ void AEnemyDrone::BeginPlay()
 
     CachePlayer();
 
-    if (CachedPlayer.IsValid())
-    {
-        FVector Direction =
-            CachedPlayer->GetActorLocation() -
-            GetActorLocation();
-        Direction.Normalize();
-        MoveDirection = Direction;
-    }
-    else
-    {
-        MoveDirection =
-            GetActorForwardVector() * -1.f;
-    }
-
-    // NO buscar el pool aquí todavía
-    // Se busca justo antes de disparar
+    MoveDirection = FVector(0.f, 1.f, 0.f);
 
     GetWorldTimerManager().SetTimer(
         FireTimerHandle,
@@ -79,6 +64,15 @@ void AEnemyDrone::MoveEnemy(float DeltaTime)
 {
     FVector NewLocation = GetActorLocation() +
         MoveDirection * MoveSpeed * DeltaTime;
+
+    if (NewLocation.Y > 700.f)
+    {
+        MoveDirection.Y = -1.f;
+    }
+    else if (NewLocation.Y < -700.f)
+    {
+        MoveDirection.Y = 1.f;
+    }
 
     SetActorLocation(NewLocation);
 
