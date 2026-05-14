@@ -1,7 +1,10 @@
+
 #include "PlayerProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "EnemyBase.h"
+#include "UObject/ConstructorHelpers.h"
+#include "DrawDebugHelpers.h"
 
 APlayerProjectile::APlayerProjectile()
 {
@@ -10,14 +13,15 @@ APlayerProjectile::APlayerProjectile()
     CollisionSphere = CreateDefaultSubobject
         <USphereComponent>(TEXT("CollisionSphere"));
     CollisionSphere->InitSphereRadius(15.f);
+    CollisionSphere->SetCollisionEnabled(
+        ECollisionEnabled::NoCollision);
     RootComponent = CollisionSphere;
 
     ProjectileMesh = CreateDefaultSubobject
         <UStaticMeshComponent>(TEXT("ProjectileMesh"));
     ProjectileMesh->SetupAttachment(RootComponent);
-
-    CollisionSphere->OnComponentHit.AddDynamic(
-        this, &APlayerProjectile::OnHit);
+    ProjectileMesh->SetCollisionEnabled(
+        ECollisionEnabled::NoCollision);
 
     InitialLifeSpan = 3.f;
 }
@@ -31,35 +35,57 @@ void APlayerProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    FVector NewLocation = GetActorLocation() +
+    // Posición actual y siguiente
+    FVector StartLocation = GetActorLocation();
+
+    FVector NextLocation = StartLocation +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;
 
-    SetActorLocation(NewLocation);
-}
+    // LineTrace para detectar colisiones
+    FHitResult HitResult;
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(this);
 
-void APlayerProjectile::OnHit(
-    UPrimitiveComponent* HitComp,
-    AActor* OtherActor,
-    UPrimitiveComponent* OtherComp,
-    FVector NormalImpulse,
-    const FHitResult& Hit)
-{
-    if (OtherActor && OtherActor != this)
+    bool bHit = GetWorld()->LineTraceSingleByChannel(
+        HitResult,
+        StartLocation,
+        NextLocation,
+        ECollisionChannel::ECC_Visibility,
+        QueryParams);
+
+    // Línea de debug visible en pantalla
+    // para verificar que el raycast funciona
+    DrawDebugLine(
+        GetWorld(),
+        StartLocation,
+        NextLocation,
+        FColor::Red,
+        false,
+        0.1f);
+
+    if (bHit)
     {
-        UE_LOG(LogTemp, Warning,
-            TEXT("Proyectil impacto con: %s"),
-            *OtherActor->GetName());
+        AActor* HitActor = HitResult.GetActor();
 
-        // Verificar si golpeó un enemigo
-        AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
+        UE_LOG(LogTemp, Warning,
+            TEXT("Proyectil toco: %s"),
+            *HitActor->GetName());
+
+        AEnemyBase* Enemy =
+            Cast<AEnemyBase>(HitActor);
+
         if (Enemy)
         {
             Enemy->TakeDamageEnemy(Damage);
             UE_LOG(LogTemp, Warning,
-                TEXT("Enemigo recibio %d de daño"), Damage);
+                TEXT("Enemigo recibio daño"));
         }
 
         Destroy();
+        return;
     }
+
+    // Mover el proyectil
+    SetActorLocation(NextLocation);
 }
