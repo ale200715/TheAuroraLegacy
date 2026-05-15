@@ -37,4 +37,7 @@ public:
     TArray<class AEnemyProjectile*> ProjectilePool;
 
     class AEnemyProjectile* GetProjectileFromPool();
+public:
+    void ReinitializePool(
+        TSubclassOf<AEnemyBase> NewEnemyClass);
 };

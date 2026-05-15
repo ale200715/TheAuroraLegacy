@@ -19,6 +19,9 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     class UStaticMeshComponent* EnemyMesh;
 
+public:
+    void RestartFireTimer();
+
 protected:
     virtual void BeginPlay() override;
     virtual void MoveEnemy(float DeltaTime) override;
@@ -27,7 +30,7 @@ protected:
     class APhase1EnemyPool* LevelPool;
     FTimerHandle FireTimerHandle;
     FTimerHandle BurstTimerHandle;
-    float FireRate = 1.5f;
+    float FireRate = 5.0f;
     int32 BurstCount = 0;
     int32 BurstMax = 2;
 

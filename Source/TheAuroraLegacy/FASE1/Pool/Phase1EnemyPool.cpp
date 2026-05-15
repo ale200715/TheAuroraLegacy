@@ -75,3 +75,39 @@ AEnemyProjectile* APhase1EnemyPool::GetProjectileFromPool()
     }
     return nullptr;
 }
+
+void APhase1EnemyPool::ReinitializePool(
+    TSubclassOf<AEnemyBase> NewEnemyClass)
+{
+    // Destruir enemigos anteriores
+    for (AEnemyBase* Enemy : EnemyPool)
+    {
+        if (Enemy) Enemy->Destroy();
+    }
+    EnemyPool.Empty();
+
+    // Crear nuevos con la clase correcta
+    EnemyClass = NewEnemyClass;
+    for (int32 i = 0; i < PoolSize; i++)
+    {
+        if (!EnemyClass) continue;
+
+        AEnemyBase* NewEnemy =
+            GetWorld()->SpawnActor<AEnemyBase>(
+                EnemyClass,
+                FVector::ZeroVector,
+                FRotator::ZeroRotator);
+
+        if (NewEnemy)
+        {
+            NewEnemy->SetActorHiddenInGame(true);
+            NewEnemy->SetActorTickEnabled(false);
+            NewEnemy->SetActorEnableCollision(false);
+            EnemyPool.Add(NewEnemy);
+        }
+    }
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Pool: Reinicializado con %d enemigos"),
+        EnemyPool.Num());
+}

@@ -38,8 +38,8 @@ AEnemyHunter::AEnemyHunter()
         TEXT("BlockAll"));
 
     // Stats según la tabla
-    Health = 2;
-    MoveSpeed = 450.f;
+    Health = 1;
+    MoveSpeed = 150.f;
     ContactDamage = 1;
     ScoreValue = 200;
 }
@@ -67,12 +67,19 @@ void AEnemyHunter::Tick(float DeltaTime)
 
 void AEnemyHunter::MoveEnemy(float DeltaTime)
 {
-    // Perseguir al jugador activamente
     if (!CachedPlayer.IsValid())
     {
         CachePlayer();
         return;
     }
+
+    float Distance = FVector::Dist(
+        GetActorLocation(),
+        CachedPlayer->GetActorLocation());
+
+    // No acercarse más de 500 unidades
+    if (Distance <= 400.f)
+        return;
 
     FVector Direction =
         CachedPlayer->GetActorLocation() -
@@ -86,10 +93,6 @@ void AEnemyHunter::MoveEnemy(float DeltaTime)
     SetActorRotation(Direction.Rotation());
 
     // Desactivar si se aleja demasiado
-    float Distance = FVector::Dist(
-        GetActorLocation(),
-        CachedPlayer->GetActorLocation());
-
     if (Distance > 5000.f)
     {
         SetActorHiddenInGame(true);
@@ -101,6 +104,7 @@ void AEnemyHunter::MoveEnemy(float DeltaTime)
             BurstTimerHandle);
     }
 }
+
 
 void AEnemyHunter::StartBurst()
 {
@@ -234,3 +238,24 @@ void AEnemyHunter::FindPool()
     LevelPool = Cast<APhase1EnemyPool>(FoundActor);
 }
 
+void AEnemyHunter::RestartFireTimer()
+{
+    // Limpiar timers anteriores
+    GetWorldTimerManager().ClearTimer(
+        FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(
+        BurstTimerHandle);
+
+    BurstCount = 0;
+
+    // Reiniciar disparo
+    GetWorldTimerManager().SetTimer(
+        FireTimerHandle,
+        this,
+        &AEnemyHunter::StartBurst,
+        FireRate,
+        true);
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Hunter: Timer de disparo reiniciado"));
+}
