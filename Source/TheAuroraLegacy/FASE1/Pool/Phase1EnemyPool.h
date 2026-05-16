@@ -40,4 +40,11 @@ public:
 public:
     void ReinitializePool(
         TSubclassOf<AEnemyBase> NewEnemyClass);
+    void SetEnemyClassBeforeInit(
+        TSubclassOf<AEnemyBase> NewClass)
+    {
+        EnemyClass = NewClass;
+    }
+public:
+    void InitializePool();
 };

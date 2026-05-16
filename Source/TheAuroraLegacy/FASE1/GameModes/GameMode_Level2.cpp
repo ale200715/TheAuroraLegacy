@@ -15,15 +15,63 @@ AGameMode_Level2::AGameMode_Level2()
     NextLevelName = FName("Level3_Support");
 }
 
+/*
 void AGameMode_Level2::BeginPlay()
 {
     FindPool();
-    
+
+    if (Level2Pool)
+    {
+        Level2Pool->EnemyClass =
+            AEnemyHunter::StaticClass();
+    }
     if (Level2Pool)
     {
         Level2Pool->ReinitializePool(
             AEnemyHunter::StaticClass());
     }
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
+    {
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->RegisterEnemyClass(
+                EEnemyType::Hunter,
+                AEnemyHunter::StaticClass());
+
+            UE_LOG(LogTemp, Warning,
+                TEXT("Level2: Hunter registrado "
+                    "en el Facade"));
+        }
+    }
+
+    Super::BeginPlay();
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Level2: Iniciado. "
+            "Derrotar %d hunters para pasar"),
+        EnemiesRequired);
+}
+*/
+
+void AGameMode_Level2::BeginPlay()
+{
+    FindPool();
+
+    if (Level2Pool)
+    {
+        Level2Pool->EnemyClass =
+            AEnemyHunter::StaticClass();
+        Level2Pool->InitializePool();
+    }
+
     TArray<AActor*> FoundFacades;
     UGameplayStatics::GetAllActorsOfClass(
         GetWorld(),

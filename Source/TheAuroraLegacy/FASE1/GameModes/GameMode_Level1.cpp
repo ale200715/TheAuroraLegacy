@@ -18,13 +18,65 @@ AGameMode_Level1::AGameMode_Level1()
     // Siguiente nivel al terminar
     NextLevelName = FName("Level2_Hunter");
 }
-
+/*
 void AGameMode_Level1::BeginPlay()
 {
     // Buscar el pool antes de llamar al padre
     FindPool();
-
+    if (Level1Pool)
+    {
+        Level1Pool->EnemyClass =
+            AEnemyDrone::StaticClass();
+    }
+    if (Level1Pool)
+    {
+        Level1Pool->ReinitializePool(
+            AEnemyDrone::StaticClass());
+    }
     // Registrar el Drone en el Facade
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
+    {
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->RegisterEnemyClass(
+                EEnemyType::Drone,
+                AEnemyDrone::StaticClass());
+
+            UE_LOG(LogTemp, Warning,
+                TEXT("Level1: Drone registrado "
+                    "en el Facade"));
+        }
+    }
+
+    // Llamar al padre que inicia el spawner
+    Super::BeginPlay();
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Level1: Iniciado. "
+            "Derrotar %d drones para pasar"),
+        EnemiesRequired);
+}
+*/
+
+void AGameMode_Level1::BeginPlay()
+{
+    FindPool();
+
+    if (Level1Pool)
+    {
+        Level1Pool->EnemyClass =
+            AEnemyDrone::StaticClass();
+        Level1Pool->InitializePool();
+    }
+
     TArray<AActor*> FoundFacades;
     UGameplayStatics::GetAllActorsOfClass(
         GetWorld(),
