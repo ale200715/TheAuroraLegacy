@@ -2,6 +2,7 @@
 
 
 #include "Phase3EnemyPool.h"
+#include "../Enemies/Enemy_Torreta.h"
 
 APhase3EnemyPool::APhase3EnemyPool()
 {
@@ -57,6 +58,16 @@ AEnemyBase* APhase3EnemyPool::GetPooledEnemy()
             Enemy->SetActorHiddenInGame(false);
             Enemy->SetActorEnableCollision(true);
             Enemy->SetActorTickEnabled(true);
+
+            // Iniciar comportamiento especifico
+            // de la torreta al activarse
+            AEnemy_Torreta* Torreta =
+                Cast<AEnemy_Torreta>(Enemy);
+            if (Torreta)
+            {
+                Torreta->ActivateTurret();
+            }
+
             return Enemy;
         }
     }
