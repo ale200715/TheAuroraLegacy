@@ -36,7 +36,7 @@ public:
 
     // Recibir daño del proyectil
     UFUNCTION()
-    void TakeDamageEnemy(int32 DamageAmount);
+    virtual void TakeDamageEnemy(int32 DamageAmount);
 
     // Verificar si está vivo
     bool IsAlive() const { return Health > 0; }
