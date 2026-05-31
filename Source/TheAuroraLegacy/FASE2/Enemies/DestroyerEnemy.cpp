@@ -1,7 +1,7 @@
 #include "DestroyerEnemy.h"
 #include "../GameModes/GameMode_Level6.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Projectiles/EnemyProjectile.h"
+#include "../Projectiles/Phase2EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 ADestroyerEnemy::ADestroyerEnemy()
@@ -123,8 +123,8 @@ void ADestroyerEnemy::TripleAttack()
         FVector SpawnLocation = GetActorLocation() + Dir * 100.f;
         FRotator SpawnRotation = Dir.ToOrientationRotator();
 
-        AEnemyProjectile* Projectile = GetWorld()->SpawnActor
-            <AEnemyProjectile>(ProjectileClass,
+        APhase2EnemyProjectile* Projectile = GetWorld()->SpawnActor
+            <APhase2EnemyProjectile>(ProjectileClass,
                 SpawnLocation, SpawnRotation);
 
         if (Projectile)

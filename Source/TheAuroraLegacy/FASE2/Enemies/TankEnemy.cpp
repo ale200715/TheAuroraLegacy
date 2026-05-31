@@ -2,7 +2,7 @@
 #include "../Strategy/ZigZagStrategy.h"
 #include "../GameModes/GameMode_Level5.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Projectiles/EnemyProjectile.h"
+#include "../Projectiles/Phase2EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 ATankEnemy::ATankEnemy()
@@ -66,8 +66,8 @@ void ATankEnemy::FireAtPlayer()
     FVector SpawnLocation = GetActorLocation() + Direction * 100.f;
     FRotator SpawnRotation = Direction.ToOrientationRotator();
 
-    AEnemyProjectile* Projectile = GetWorld()->SpawnActor
-        <AEnemyProjectile>(ProjectileClass,
+    APhase2EnemyProjectile* Projectile = GetWorld()->SpawnActor
+        <APhase2EnemyProjectile>(ProjectileClass,
             SpawnLocation, SpawnRotation);
 
     if (Projectile)

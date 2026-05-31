@@ -1,7 +1,7 @@
 #include "InfantryEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameModes/GameMode_Level4.h"
-#include "../Projectiles/EnemyProjectile.h"
+#include "../Projectiles/Phase2EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 AInfantryEnemy::AInfantryEnemy()
@@ -58,8 +58,8 @@ void AInfantryEnemy::FireBurst()
                     Direction * 100.f;
                 FRotator SpawnRotation = Direction.ToOrientationRotator();
 
-                AEnemyProjectile* Projectile = GetWorld()->SpawnActor
-                    <AEnemyProjectile>(ProjectileClass,
+                APhase2EnemyProjectile* Projectile = GetWorld()->SpawnActor
+                    <APhase2EnemyProjectile>(ProjectileClass,
                         SpawnLocation, SpawnRotation);
 
                 if (Projectile)

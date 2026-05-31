@@ -22,7 +22,7 @@ public:
     float FireRate = 1.f;
 
     UPROPERTY(EditAnywhere, Category = "Combat")
-    TSubclassOf<class AEnemyProjectile> ProjectileClass;
+    TSubclassOf<class APhase2EnemyProjectile> ProjectileClass;;
 
 private:
     // Strategy pattern

@@ -1,10 +1,10 @@
-#include "EnemyProjectile.h"
+#include "Phase2EnemyProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "../../TheAuroraLegacyPawn.h"
 
-AEnemyProjectile::AEnemyProjectile()
+APhase2EnemyProjectile::APhase2EnemyProjectile()
 {
     PrimaryActorTick.bCanEverTick = true;
 
@@ -19,18 +19,18 @@ AEnemyProjectile::AEnemyProjectile()
     ProjectileMesh->SetupAttachment(RootComponent);
 
     CollisionSphere->OnComponentHit.AddDynamic(
-        this, &AEnemyProjectile::OnHit);
+        this, &APhase2EnemyProjectile::OnHit);
 
     InitialLifeSpan = 3.f;
     Direction = FVector::ForwardVector;
 }
 
-void AEnemyProjectile::BeginPlay()
+void APhase2EnemyProjectile::BeginPlay()
 {
     Super::BeginPlay();
 }
 
-void AEnemyProjectile::Tick(float DeltaTime)
+void APhase2EnemyProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
@@ -39,7 +39,7 @@ void AEnemyProjectile::Tick(float DeltaTime)
     SetActorLocation(NewLocation, true);
 }
 
-void AEnemyProjectile::OnHit(
+void APhase2EnemyProjectile::OnHit(
     UPrimitiveComponent* HitComp,
     AActor* OtherActor,
     UPrimitiveComponent* OtherComp,
@@ -48,14 +48,13 @@ void AEnemyProjectile::OnHit(
 {
     if (!OtherActor || OtherActor == this) return;
 
-    // Verificar si golpeo al jugador
     ATheAuroraLegacyPawn* Player = Cast<ATheAuroraLegacyPawn>(OtherActor);
     if (Player)
     {
         Player->TakeDamage_Ship(Damage);
         UE_LOG(LogTemp, Warning,
-            TEXT("Proyectil enemigo golpeo al jugador! Daño: %d"), Damage);
+            TEXT("Proyectil fase2 golpeo al jugador! Danio: %d"), Damage);
     }
 
     Destroy();
-}
+} 

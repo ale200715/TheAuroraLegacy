@@ -2,15 +2,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SphereComponent.h"
-#include "EnemyProjectile.generated.h"
+#include "Phase2EnemyProjectile.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AEnemyProjectile : public AActor
+class THEAURORALEGACY_API APhase2EnemyProjectile : public AActor
 {
     GENERATED_BODY()
 
 public:
-    AEnemyProjectile();
+    APhase2EnemyProjectile();
     virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(EditAnywhere, Category = "Combat")

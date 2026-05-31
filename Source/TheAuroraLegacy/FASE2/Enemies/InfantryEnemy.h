@@ -21,7 +21,7 @@ public:
     int32 BurstCount = 3;
 
     UPROPERTY(EditAnywhere, Category = "Combat")
-    TSubclassOf<class AEnemyProjectile> ProjectileClass;
+    TSubclassOf<class APhase2EnemyProjectile> ProjectileClass;
 
     UFUNCTION()
     void OnInfantryDestroyed(AActor* DestroyedActor);
