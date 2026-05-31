@@ -1,125 +1,3 @@
-/*
-#include "Phase1EnemyPool.h"
-#include "../Enemies/EnemyDrone.h"
-#include "../Projectiles/EnemyProjectile.h"
-
-APhase1EnemyPool::APhase1EnemyPool()
-{
-    PrimaryActorTick.bCanEverTick = false;
-    ProjectileClass =
-        AEnemyProjectile::StaticClass();
-    PoolSize = 20;
-}
-
-void APhase1EnemyPool::BeginPlay()
-{
-    Super::BeginPlay();
-
-    // Solo crear enemigos si hay clase asignada
-    // El GameMode asigna la clase antes con
-    // ReinitializePool
-    if (EnemyClass)
-    {
-        for (int32 i = 0; i < PoolSize; i++)
-        {
-            AEnemyBase* NewEnemy =
-                GetWorld()->SpawnActor<AEnemyBase>(
-                    EnemyClass,
-                    FVector::ZeroVector,
-                    FRotator::ZeroRotator);
-
-            if (NewEnemy)
-            {
-                NewEnemy->SetActorHiddenInGame(true);
-                NewEnemy->SetActorTickEnabled(false);
-                NewEnemy->SetActorEnableCollision(
-                    false);
-                EnemyPool.Add(NewEnemy);
-            }
-        }
-    }
-
-    // Proyectiles siempre se inicializan
-    for (int32 i = 0; i < 20; i++)
-    {
-        if (ProjectileClass)
-        {
-            AEnemyProjectile* NewProj =
-                GetWorld()->SpawnActor
-                <AEnemyProjectile>(
-                    ProjectileClass,
-                    FVector::ZeroVector,
-                    FRotator::ZeroRotator);
-
-            if (NewProj)
-            {
-                NewProj->SetActorHiddenInGame(true);
-                NewProj->SetActorTickEnabled(false);
-                NewProj->SetActorEnableCollision(
-                    false);
-                ProjectilePool.Add(NewProj);
-            }
-        }
-    }
-}
-
-AEnemyBase* APhase1EnemyPool::GetEnemyFromPool()
-{
-    for (AEnemyBase* Enemy : EnemyPool)
-    {
-        if (Enemy && Enemy->IsHidden())
-            return Enemy;
-    }
-    return nullptr;
-}
-
-AEnemyProjectile*
-APhase1EnemyPool::GetProjectileFromPool()
-{
-    for (AEnemyProjectile* Proj : ProjectilePool)
-    {
-        if (Proj && Proj->IsHidden())
-            return Proj;
-    }
-    return nullptr;
-}
-
-void APhase1EnemyPool::ReinitializePool(
-    TSubclassOf<AEnemyBase> NewEnemyClass)
-{
-    for (AEnemyBase* Enemy : EnemyPool)
-        if (Enemy) Enemy->Destroy();
-
-    EnemyPool.Empty();
-    EnemyClass = NewEnemyClass;
-
-    for (int32 i = 0; i < PoolSize; i++)
-    {
-        if (!EnemyClass) continue;
-
-        AEnemyBase* NewEnemy =
-            GetWorld()->SpawnActor<AEnemyBase>(
-                EnemyClass,
-                FVector::ZeroVector,
-                FRotator::ZeroRotator);
-
-        if (NewEnemy)
-        {
-            NewEnemy->SetActorHiddenInGame(true);
-            NewEnemy->SetActorTickEnabled(false);
-            NewEnemy->SetActorEnableCollision(false);
-            EnemyPool.Add(NewEnemy);
-        }
-    }
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Pool: Reinicializado con %d enemigos"),
-        EnemyPool.Num());
-}
-
-*/
-
-
 #include "Phase1EnemyPool.h"
 #include "../Enemies/EnemyDrone.h"     
 #include "../Projectiles/EnemyProjectile.h"
@@ -128,11 +6,7 @@ APhase1EnemyPool::APhase1EnemyPool()
 {
     PrimaryActorTick.bCanEverTick = false;
 
-    // Asignar clases directamente en C++
-    // sin necesidad de Blueprint
-    //EnemyClass = AEnemyDrone::StaticClass();
-    ProjectileClass =
-        AEnemyProjectile::StaticClass();
+    ProjectileClass = AEnemyProjectile::StaticClass();
     PoolSize = 20;
 }
 
@@ -141,13 +15,8 @@ void APhase1EnemyPool::BeginPlay()
     Super::BeginPlay();
 
     FTimerHandle InitTimer;
-    GetWorldTimerManager().SetTimer(
-        InitTimer,
-        this,
-        &APhase1EnemyPool::InitializePool,
-        0.1f,
-        false);
-    // 1. Pre-cargar Enemigos
+    GetWorldTimerManager().SetTimer( InitTimer, this, &APhase1EnemyPool::InitializePool, 0.1f, false);
+
     for (int32 i = 0; i < PoolSize; i++)
     {
         if (EnemyClass)
@@ -163,7 +32,6 @@ void APhase1EnemyPool::BeginPlay()
         }
     }
 
-    // 2. Pre-cargar Proyectiles (haremos 20 para que alcancen para todos los drones)
     for (int32 i = 0; i < 20; i++)
     {
         if (ProjectileClass)
@@ -180,17 +48,16 @@ void APhase1EnemyPool::BeginPlay()
     }
 }
 
-// Función maestra: busca un enemigo que no esté activo
 AEnemyBase* APhase1EnemyPool::GetEnemyFromPool()
 {
     for (AEnemyBase* Enemy : EnemyPool)
     {
-        if (Enemy && Enemy->IsHidden()) // Si está oculto, está disponible
+        if (Enemy && Enemy->IsHidden()) 
         {
             return Enemy;
         }
     }
-    return nullptr; // Si todos están ocupados
+    return nullptr; 
 }
 
 AEnemyProjectile* APhase1EnemyPool::GetProjectileFromPool()
@@ -209,8 +76,7 @@ void APhase1EnemyPool::InitializePool()
 {
     if (!EnemyClass)
     {
-        UE_LOG(LogTemp, Error,
-            TEXT("Pool: No hay EnemyClass asignada"));
+        UE_LOG(LogTemp, Error,TEXT("Pool: No hay EnemyClass asignada"));
         return;
     }
 
@@ -218,11 +84,7 @@ void APhase1EnemyPool::InitializePool()
 
     for (int32 i = 0; i < PoolSize; i++)
     {
-        AEnemyBase* NewEnemy =
-            GetWorld()->SpawnActor<AEnemyBase>(
-                EnemyClass,
-                FVector::ZeroVector,
-                FRotator::ZeroRotator);
+        AEnemyBase* NewEnemy = GetWorld()->SpawnActor<AEnemyBase>(EnemyClass,  FVector::ZeroVector, FRotator::ZeroRotator);
 
         if (NewEnemy)
         {
@@ -233,34 +95,23 @@ void APhase1EnemyPool::InitializePool()
         }
     }
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Pool: Inicializado con %d enemigos "
-            "de clase %s"),
-        EnemyPool.Num(),
-        *EnemyClass->GetName());
+    UE_LOG(LogTemp, Warning,TEXT("Pool: Inicializado con %d enemigos  de clase %s"), EnemyPool.Num(), *EnemyClass->GetName());
 }
 
-void APhase1EnemyPool::ReinitializePool(
-    TSubclassOf<AEnemyBase> NewEnemyClass)
+void APhase1EnemyPool::ReinitializePool(TSubclassOf<AEnemyBase> NewEnemyClass)
 {
-    // Destruir enemigos anteriores
     for (AEnemyBase* Enemy : EnemyPool)
     {
         if (Enemy) Enemy->Destroy();
     }
     EnemyPool.Empty();
 
-    // Crear nuevos con la clase correcta
     EnemyClass = NewEnemyClass;
     for (int32 i = 0; i < PoolSize; i++)
     {
         if (!EnemyClass) continue;
 
-        AEnemyBase* NewEnemy =
-            GetWorld()->SpawnActor<AEnemyBase>(
-                EnemyClass,
-                FVector::ZeroVector,
-                FRotator::ZeroRotator);
+        AEnemyBase* NewEnemy = GetWorld()->SpawnActor<AEnemyBase>( EnemyClass, FVector::ZeroVector, FRotator::ZeroRotator);
 
         if (NewEnemy)
         {
@@ -271,7 +122,5 @@ void APhase1EnemyPool::ReinitializePool(
         }
     }
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Pool: Reinicializado con %d enemigos"),
-        EnemyPool.Num());
+    UE_LOG(LogTemp, Warning, TEXT("Pool: Reinicializado con %d enemigos"), EnemyPool.Num());
 }

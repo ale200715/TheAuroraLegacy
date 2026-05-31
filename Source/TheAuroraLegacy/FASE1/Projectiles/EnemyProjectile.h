@@ -4,7 +4,6 @@
 #include "GameFramework/Actor.h"
 #include "EnemyProjectile.generated.h"
 
-// Forward Declarations (Optimización de compilación)
 class USphereComponent;
 class UStaticMeshComponent;
 
@@ -16,7 +15,6 @@ public:
     AEnemyProjectile();
     virtual void Tick(float DeltaTime) override;
 
-    // Agregar aquí en public:
     void DeactivateSelf();
 
     USphereComponent* CollisionSphere;
@@ -32,13 +30,8 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    // DeactivateSelf ya NO va aquí
     FTimerHandle DeactivateTimer;
 
     UFUNCTION()
-    void OnHit(UPrimitiveComponent* HitComp,
-        AActor* OtherActor,
-        UPrimitiveComponent* OtherComp,
-        FVector NormalImpulse,
-        const FHitResult& Hit);
+    void OnHit(UPrimitiveComponent* HitComp,AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };

@@ -18,8 +18,7 @@ AEnemyDrone::AEnemyDrone()
     RootComponent = EnemyMesh;
 
     static ConstructorHelpers::FObjectFinder
-        <UStaticMesh> DroneMeshAsset(
-            TEXT("/Engine/BasicShapes/Cube.Cube"));
+        <UStaticMesh> DroneMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
 
     if (DroneMeshAsset.Succeeded())
     {
@@ -78,18 +77,12 @@ void AEnemyDrone::MoveEnemy(float DeltaTime)
 
     SetActorLocation(NewLocation);
 
-    // Si se aleja más de 3000 unidades 
-    // del jugador desactivarse
     if (CachedPlayer.IsValid())
     {
-        float Distance = FVector::Dist(
-            GetActorLocation(),
-            CachedPlayer->GetActorLocation());
+        float Distance = FVector::Dist(GetActorLocation(), CachedPlayer->GetActorLocation());
 
         if (Distance > 3000.f)
         {
-            // Desactivar en lugar de destruir
-            // para que el pool lo reutilice
             SetActorHiddenInGame(true);
             SetActorTickEnabled(false);
             SetActorEnableCollision(false);
@@ -121,8 +114,7 @@ void AEnemyDrone::FireProjectile()
 
     if (!Bullet) return;
 
-    FVector SpawnLocation = GetActorLocation() +
-        GetActorForwardVector() * 100.f;
+    FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
 
     FRotator ShootRotation = GetActorRotation();
     if (CachedPlayer.IsValid())
@@ -140,19 +132,13 @@ void AEnemyDrone::FireProjectile()
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
 
-    // Auto-desactivar después de 3 segundos
-    // si no golpea nada
     FTimerHandle DeactivateTimer;
     FTimerDelegate DeactivateDelegate;
     DeactivateDelegate.BindUObject(
         Bullet,
         &AEnemyProjectile::DeactivateSelf);
 
-    GetWorldTimerManager().SetTimer(
-        DeactivateTimer,
-        DeactivateDelegate,
-        3.f,
-        false);
+    GetWorldTimerManager().SetTimer( DeactivateTimer, DeactivateDelegate, 3.f, false);
 
     UE_LOG(LogTemp, Warning,
         TEXT("Drone: Proyectil disparado"));
@@ -171,8 +157,6 @@ void AEnemyDrone::OnDeath()
     UE_LOG(LogTemp, Warning,
         TEXT("Drone muerto - regresando al pool"));
 
-    // Notificar al Facade y GameMode
-    // igual que EnemyBase pero SIN destruir
     TArray<AActor*> FoundFacades;
     UGameplayStatics::GetAllActorsOfClass(
         GetWorld(),
@@ -193,8 +177,7 @@ void AEnemyDrone::OnDeath()
     if (GM)
         GM->OnEnemyDefeated(ScoreValue);
 
-    // Desactivar en lugar de destruir
-    // para regresar al pool
+    
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);

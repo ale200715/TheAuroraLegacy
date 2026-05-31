@@ -15,105 +15,45 @@ AGameMode_Level2::AGameMode_Level2()
     NextLevelName = FName("Level3_Support");
 }
 
-/*
 void AGameMode_Level2::BeginPlay()
 {
     FindPool();
 
     if (Level2Pool)
     {
-        Level2Pool->EnemyClass =
-            AEnemyHunter::StaticClass();
+        Level2Pool->EnemyClass = AEnemyHunter::StaticClass(); Level2Pool->InitializePool();
     }
-    if (Level2Pool)
-    {
-        Level2Pool->ReinitializePool(
-            AEnemyHunter::StaticClass());
-    }
+
     TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(
-        GetWorld(),
-        AGameFacade::StaticClass(),
-        FoundFacades);
+    UGameplayStatics::GetAllActorsOfClass( GetWorld(), AGameFacade::StaticClass(), FoundFacades);
 
     if (FoundFacades.Num() > 0)
     {
-        AGameFacade* Facade =
-            Cast<AGameFacade>(FoundFacades[0]);
+        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
         if (Facade)
         {
-            Facade->RegisterEnemyClass(
-                EEnemyType::Hunter,
-                AEnemyHunter::StaticClass());
+            Facade->RegisterEnemyClass( EEnemyType::Hunter, AEnemyHunter::StaticClass());
 
-            UE_LOG(LogTemp, Warning,
-                TEXT("Level2: Hunter registrado "
-                    "en el Facade"));
+            UE_LOG(LogTemp, Warning,TEXT("Level2: Hunter registrado en el Facade"));
         }
     }
 
     Super::BeginPlay();
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Level2: Iniciado. "
-            "Derrotar %d hunters para pasar"),
-        EnemiesRequired);
-}
-*/
-
-void AGameMode_Level2::BeginPlay()
-{
-    FindPool();
-
-    if (Level2Pool)
-    {
-        Level2Pool->EnemyClass =
-            AEnemyHunter::StaticClass();
-        Level2Pool->InitializePool();
-    }
-
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(
-        GetWorld(),
-        AGameFacade::StaticClass(),
-        FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade =
-            Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
-        {
-            Facade->RegisterEnemyClass(
-                EEnemyType::Hunter,
-                AEnemyHunter::StaticClass());
-
-            UE_LOG(LogTemp, Warning,
-                TEXT("Level2: Hunter registrado "
-                    "en el Facade"));
-        }
-    }
-
-    Super::BeginPlay();
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Level2: Iniciado. "
-            "Derrotar %d hunters para pasar"),
-        EnemiesRequired);
+    UE_LOG(LogTemp, Warning, TEXT("Level2: Iniciado. Derrotar %d hunters para pasar"), EnemiesRequired);
 }
 
 void AGameMode_Level2::SpawnEnemy()
 {
     if (EnemiesDefeated >= EnemiesRequired)
     {
-        GetWorldTimerManager().ClearTimer(
-            SpawnTimerHandle);
+        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
         return;
     }
 
-    if (TotalSpawned - EnemiesDefeated >=
-        MaxActiveAtOnce)
+    if (TotalSpawned - EnemiesDefeated >= MaxActiveAtOnce) {
         return;
+    }
 
     if (!Level2Pool)
     {
@@ -121,31 +61,22 @@ void AGameMode_Level2::SpawnEnemy()
         if (!Level2Pool) return;
     }
 
-    AEnemyBase* Hunter =
-        Level2Pool->GetEnemyFromPool();
+    AEnemyBase* Hunter =Level2Pool->GetEnemyFromPool();
 
     if (!Hunter)
     {
-        UE_LOG(LogTemp, Warning,
-            TEXT("Level2: Pool sin hunters"));
+        UE_LOG(LogTemp, Warning, TEXT("Level2: Pool sin hunters"));
         return;
     }
 
-    APawn* Player =
-        UGameplayStatics::GetPlayerPawn(
-            GetWorld(), 0);
+    APawn* Player = UGameplayStatics::GetPlayerPawn( GetWorld(), 0);
 
     if (!Player) return;
 
-    float RandomY = FMath::RandRange(
-        -300.f, 300.f);
-    float RandomZ = FMath::RandRange(
-        0.f, 100.f);
+    float RandomY = FMath::RandRange( -300.f, 300.f);
+    float RandomZ = FMath::RandRange( 0.f, 100.f);
 
-    FVector SpawnLocation =
-        Player->GetActorLocation() +
-        Player->GetActorForwardVector() *
-        SpawnDistance;
+    FVector SpawnLocation = Player->GetActorLocation() + Player->GetActorForwardVector() * SpawnDistance;
 
     SpawnLocation.Y += RandomY;
     SpawnLocation.Z += RandomZ;
@@ -156,8 +87,7 @@ void AGameMode_Level2::SpawnEnemy()
     Hunter->SetActorTickEnabled(true);
     Hunter->Health = 2;
 
-    AEnemyHunter* HunterCast =
-        Cast<AEnemyHunter>(Hunter);
+    AEnemyHunter* HunterCast = Cast<AEnemyHunter>(Hunter);
     if (HunterCast)
     {
         HunterCast->RestartFireTimer();
@@ -165,31 +95,21 @@ void AGameMode_Level2::SpawnEnemy()
 
     TotalSpawned++;
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Level2: Hunter %d spawneado. "
-            "Derrotados: %d/%d"),
-        TotalSpawned,
-        EnemiesDefeated,
-        EnemiesRequired);
+    UE_LOG(LogTemp, Warning, TEXT("Level2: Hunter %d spawneado. Derrotados: %d/%d"),TotalSpawned,EnemiesDefeated, EnemiesRequired);
 }
 
 void AGameMode_Level2::FindPool()
 {
-    AActor* FoundActor =
-        UGameplayStatics::GetActorOfClass(
-            GetWorld(),
-            APhase1EnemyPool::StaticClass());
+    AActor* FoundActor =UGameplayStatics::GetActorOfClass(GetWorld(), APhase1EnemyPool::StaticClass());
 
     Level2Pool = Cast<APhase1EnemyPool>(FoundActor);
 
     if (Level2Pool) {
 
-        UE_LOG(LogTemp, Warning,
-            TEXT("Level2: Pool encontrado"));
+        UE_LOG(LogTemp, Warning,TEXT("Level2: Pool encontrado"));
     }
     else {
 
-        UE_LOG(LogTemp, Error,
-            TEXT("Level2: No se encontro el Pool"));
+        UE_LOG(LogTemp, Error,TEXT("Level2: No se encontro el Pool"));
     }
 }

@@ -31,13 +31,9 @@ AEnemyHunter::AEnemyHunter()
             FVector(0.5f, 0.5f, 0.5f));
     }
 
-    // Configurar colisión
-    EnemyMesh->SetCollisionEnabled(
-        ECollisionEnabled::QueryAndPhysics);
-    EnemyMesh->SetCollisionProfileName(
-        TEXT("BlockAll"));
+    EnemyMesh->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics);
+    EnemyMesh->SetCollisionProfileName(TEXT("BlockAll"));
 
-    // Stats según la tabla
     Health = 1;
     MoveSpeed = 150.f;
     ContactDamage = 1;
@@ -51,13 +47,7 @@ void AEnemyHunter::BeginPlay()
     CachePlayer();
     FindPool();
 
-    // Iniciar ráfagas periódicas
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemyHunter::StartBurst,
-        FireRate,
-        true);
+    GetWorldTimerManager().SetTimer(  FireTimerHandle, this, &AEnemyHunter::StartBurst,  FireRate, true);
 }
 
 void AEnemyHunter::Tick(float DeltaTime)
@@ -73,26 +63,19 @@ void AEnemyHunter::MoveEnemy(float DeltaTime)
         return;
     }
 
-    float Distance = FVector::Dist(
-        GetActorLocation(),
-        CachedPlayer->GetActorLocation());
+    float Distance = FVector::Dist( GetActorLocation(), CachedPlayer->GetActorLocation());
 
-    // No acercarse más de 500 unidades
-    if (Distance <= 400.f)
+    if (Distance <= 400.f) {
         return;
+    }
 
-    FVector Direction =
-        CachedPlayer->GetActorLocation() -
-        GetActorLocation();
-    Direction.Normalize();
+    FVector Direction = CachedPlayer->GetActorLocation() - GetActorLocation(); Direction.Normalize();
 
-    FVector NewLocation = GetActorLocation() +
-        Direction * MoveSpeed * DeltaTime;
+    FVector NewLocation = GetActorLocation() + Direction * MoveSpeed * DeltaTime;
 
     SetActorLocation(NewLocation);
     SetActorRotation(Direction.Rotation());
 
-    // Desactivar si se aleja demasiado
     if (Distance > 5000.f)
     {
         SetActorHiddenInGame(true);
