@@ -35,10 +35,6 @@ void APlayerProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-<<<<<<< HEAD
-    // Posición actual y siguiente
-=======
->>>>>>> fase1-ale
     FVector StartLocation = GetActorLocation();
 
     FVector NextLocation = StartLocation +
@@ -46,14 +42,18 @@ void APlayerProjectile::Tick(float DeltaTime)
         ProjectileSpeed * DeltaTime;
 
 <<<<<<< HEAD
-    // LineTrace para detectar colisiones
 =======
->>>>>>> fase1-ale
+    // LineTrace para detectar colisiones
+>>>>>>> origin/fase2-camila
     FHitResult HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
 <<<<<<< HEAD
+    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, NextLocation,  ECollisionChannel::ECC_Visibility, QueryParams);
+
+    DrawDebugLine( GetWorld(), StartLocation, NextLocation, FColor::Red, false, 0.1f);
+=======
     bool bHit = GetWorld()->LineTraceSingleByChannel(
         HitResult,
         StartLocation,
@@ -70,11 +70,7 @@ void APlayerProjectile::Tick(float DeltaTime)
         FColor::Red,
         false,
         0.1f);
-=======
-    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, NextLocation,  ECollisionChannel::ECC_Visibility, QueryParams);
-
-    DrawDebugLine( GetWorld(), StartLocation, NextLocation, FColor::Red, false, 0.1f);
->>>>>>> fase1-ale
+>>>>>>> origin/fase2-camila
 
     if (bHit)
     {
@@ -99,8 +95,8 @@ void APlayerProjectile::Tick(float DeltaTime)
     }
 
 <<<<<<< HEAD
-    // Mover el proyectil
 =======
->>>>>>> fase1-ale
+    // Mover el proyectil
+>>>>>>> origin/fase2-camila
     SetActorLocation(NextLocation);
 }
