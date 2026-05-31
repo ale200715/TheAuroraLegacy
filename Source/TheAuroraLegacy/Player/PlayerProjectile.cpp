@@ -36,41 +36,21 @@ void APlayerProjectile::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     FVector StartLocation = GetActorLocation();
-
     FVector NextLocation = StartLocation +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;
 
-<<<<<<< HEAD
-=======
     // LineTrace para detectar colisiones
->>>>>>> origin/fase2-camila
     FHitResult HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-<<<<<<< HEAD
-    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, NextLocation,  ECollisionChannel::ECC_Visibility, QueryParams);
-
-    DrawDebugLine( GetWorld(), StartLocation, NextLocation, FColor::Red, false, 0.1f);
-=======
     bool bHit = GetWorld()->LineTraceSingleByChannel(
         HitResult,
         StartLocation,
         NextLocation,
         ECollisionChannel::ECC_Visibility,
         QueryParams);
-
-    // Línea de debug visible en pantalla
-    // para verificar que el raycast funciona
-    DrawDebugLine(
-        GetWorld(),
-        StartLocation,
-        NextLocation,
-        FColor::Red,
-        false,
-        0.1f);
->>>>>>> origin/fase2-camila
 
     if (bHit)
     {
@@ -94,9 +74,6 @@ void APlayerProjectile::Tick(float DeltaTime)
         return;
     }
 
-<<<<<<< HEAD
-=======
-    // Mover el proyectil
->>>>>>> origin/fase2-camila
+    // MOVER el proyectil hacia adelante
     SetActorLocation(NextLocation);
 }
