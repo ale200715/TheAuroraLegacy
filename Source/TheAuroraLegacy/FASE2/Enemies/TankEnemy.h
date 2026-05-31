@@ -21,6 +21,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     float FireRate = 1.f;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSubclassOf<class AEnemyProjectile> ProjectileClass;
+
 private:
     // Strategy pattern
     IMovementStrategy* MovementStrategy;

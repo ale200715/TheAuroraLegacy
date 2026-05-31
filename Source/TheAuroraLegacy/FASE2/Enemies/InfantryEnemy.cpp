@@ -1,6 +1,7 @@
 #include "InfantryEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "../GameModes/GameMode_Level4.h"
+#include "../Projectiles/EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 AInfantryEnemy::AInfantryEnemy()
@@ -34,11 +35,43 @@ void AInfantryEnemy::Tick(float DeltaTime)
 void AInfantryEnemy::FireBurst()
 {
     if (!IsValid(this)) return;
+    if (!ProjectileClass) return;
 
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-    if (Player)
+    if (!Player) return;
+
+    // Disparar rafaga de 3 proyectiles
+    for (int32 i = 0; i < BurstCount; i++)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Infantry disparo al jugador!"));
+        FTimerHandle BurstHandle;
+        GetWorldTimerManager().SetTimer(
+            BurstHandle,
+            [this, Player]()
+            {
+                if (!IsValid(this) || !Player) return;
+
+                FVector Direction = Player->GetActorLocation()
+                    - GetActorLocation();
+                Direction.Normalize();
+
+                FVector SpawnLocation = GetActorLocation() +
+                    Direction * 100.f;
+                FRotator SpawnRotation = Direction.ToOrientationRotator();
+
+                AEnemyProjectile* Projectile = GetWorld()->SpawnActor
+                    <AEnemyProjectile>(ProjectileClass,
+                        SpawnLocation, SpawnRotation);
+
+                if (Projectile)
+                {
+                    Projectile->Direction = Direction;
+                    UE_LOG(LogTemp, Warning,
+                        TEXT("Infantry disparo proyectil!"));
+                }
+            },
+            FireRate * i + 0.1f,
+            false
+        );
     }
 }
 

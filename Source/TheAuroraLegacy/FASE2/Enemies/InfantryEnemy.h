@@ -20,6 +20,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     int32 BurstCount = 3;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSubclassOf<class AEnemyProjectile> ProjectileClass;
+
     UFUNCTION()
     void OnInfantryDestroyed(AActor* DestroyedActor);
 

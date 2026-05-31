@@ -2,6 +2,7 @@
 #include "../Strategy/ZigZagStrategy.h"
 #include "../GameModes/GameMode_Level5.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Projectiles/EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 ATankEnemy::ATankEnemy()
@@ -54,10 +55,25 @@ void ATankEnemy::Tick(float DeltaTime)
 void ATankEnemy::FireAtPlayer()
 {
     if (!IsValid(this)) return;
+    if (!ProjectileClass) return;
+
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-    if (Player)
+    if (!Player) return;
+
+    FVector Direction = Player->GetActorLocation() - GetActorLocation();
+    Direction.Normalize();
+
+    FVector SpawnLocation = GetActorLocation() + Direction * 100.f;
+    FRotator SpawnRotation = Direction.ToOrientationRotator();
+
+    AEnemyProjectile* Projectile = GetWorld()->SpawnActor
+        <AEnemyProjectile>(ProjectileClass,
+            SpawnLocation, SpawnRotation);
+
+    if (Projectile)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Tank disparo al jugador!"));
+        Projectile->Direction = Direction;
+        UE_LOG(LogTemp, Warning, TEXT("Tank disparo proyectil!"));
     }
 }
 

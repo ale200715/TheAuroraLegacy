@@ -39,6 +39,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     float AttackInterval = 3.f;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    TSubclassOf<class AEnemyProjectile> ProjectileClass;
+
     // Sobreescribir daño para ignorarlo con escudo
     void TakeDamageDestroyer(int32 DamageAmount);
 

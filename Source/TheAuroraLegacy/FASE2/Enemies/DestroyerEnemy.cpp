@@ -1,6 +1,7 @@
 #include "DestroyerEnemy.h"
 #include "../GameModes/GameMode_Level6.h"
 #include "Kismet/GameplayStatics.h"
+#include "../Projectiles/EnemyProjectile.h"
 #include "../AuroraGameInstance.h"
 
 ADestroyerEnemy::ADestroyerEnemy()
@@ -100,15 +101,41 @@ void ADestroyerEnemy::DeactivateShield()
 void ADestroyerEnemy::TripleAttack()
 {
     if (CurrentState == EDestroyerState::Dead) return;
+    if (!ProjectileClass) return;
 
     ChangeState(EDestroyerState::Attack);
 
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
 
-    UE_LOG(LogTemp, Warning, TEXT("Destroyer disparo triple!"));
+    // Direccion principal hacia el jugador
+    FVector MainDirection = Player->GetActorLocation() - GetActorLocation();
+    MainDirection.Normalize();
 
-    // Volver a Normal después del ataque
+    // 3 direcciones: centro, izquierda, derecha
+    TArray<FVector> Directions;
+    Directions.Add(MainDirection);
+    Directions.Add(MainDirection.RotateAngleAxis(30.f, FVector::UpVector));
+    Directions.Add(MainDirection.RotateAngleAxis(-30.f, FVector::UpVector));
+
+    for (FVector Dir : Directions)
+    {
+        FVector SpawnLocation = GetActorLocation() + Dir * 100.f;
+        FRotator SpawnRotation = Dir.ToOrientationRotator();
+
+        AEnemyProjectile* Projectile = GetWorld()->SpawnActor
+            <AEnemyProjectile>(ProjectileClass,
+                SpawnLocation, SpawnRotation);
+
+        if (Projectile)
+        {
+            Projectile->Direction = Dir;
+            UE_LOG(LogTemp, Warning,
+                TEXT("Destroyer disparo triple!"));
+        }
+    }
+
+    // Volver a Normal
     FTimerHandle ReturnTimer;
     GetWorldTimerManager().SetTimer(
         ReturnTimer,
