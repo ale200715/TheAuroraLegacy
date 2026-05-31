@@ -8,32 +8,21 @@ class ATheAuroraLegacyPawn : public APawn
 {
     GENERATED_BODY()
 
-    UPROPERTY(Category = Mesh, VisibleDefaultsOnly,
-        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category = Mesh, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     class UStaticMeshComponent* PlaneMesh;
 
-    UPROPERTY(Category = Camera, VisibleDefaultsOnly,
-        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     class USpringArmComponent* SpringArm;
 
-    UPROPERTY(Category = Camera, VisibleDefaultsOnly,
-        BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(Category = Camera, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     class UCameraComponent* Camera;
 
 public:
     ATheAuroraLegacyPawn();
 
     virtual void Tick(float DeltaSeconds) override;
-    virtual void NotifyHit(class UPrimitiveComponent* MyComp,
-        class AActor* Other,
-        class UPrimitiveComponent* OtherComp,
-        bool bSelfMoved,
-        FVector HitLocation,
-        FVector HitNormal,
-        FVector NormalImpulse,
-        const FHitResult& Hit) override;
+    virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other,class UPrimitiveComponent* OtherComp,bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
-    //  Disparo 
     UFUNCTION()
     void Fire();
 
@@ -44,8 +33,7 @@ public:
     float FireRate = 0.2f;
 
     // Vidas 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite,
-        Category = "Stats")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
     int32 Lives = 3;
 
     UFUNCTION()
@@ -53,9 +41,14 @@ public:
 
     int32 GetLives() const { return Lives; }
 
+    float GetMaxSpeed() const { return MaxSpeed; }
+    void SetMaxSpeed(float NewSpeed)
+    {
+        MaxSpeed = NewSpeed;
+    }
+
 protected:
-    virtual void SetupPlayerInputComponent(
-        class UInputComponent* InputComponent) override;
+    virtual void SetupPlayerInputComponent( class UInputComponent* InputComponent) override;
 
     void ThrustInput(float Val);
     void MoveUpInput(float Val);
@@ -79,7 +72,6 @@ private:
     float CurrentPitchSpeed;
     float CurrentRollSpeed;
 
-    // Variables internas de disparo
     bool bCanFire = true;
     FTimerHandle FireTimerHandle;
     void ResetFire();

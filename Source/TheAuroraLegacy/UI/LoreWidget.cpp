@@ -13,9 +13,7 @@ void ULoreWidget::NativeConstruct()
             this, &ULoreWidget::OnContinueClicked);
     }
 
-    // para mostrar el cursor cursor 
-    APlayerController* PC =
-        GetWorld()->GetFirstPlayerController();
+    APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(true);
@@ -38,7 +36,6 @@ void ULoreWidget::SetupLore(
 
 void ULoreWidget::OnContinueClicked()
 {
-    // Restaurar input del jugador
     APlayerController* PC =
         GetWorld()->GetFirstPlayerController();
     if (PC)
@@ -47,7 +44,6 @@ void ULoreWidget::OnContinueClicked()
         PC->SetInputMode(FInputModeGameOnly());
     }
 
-    // Cargar el siguiente nivel
     if (NextLevel != NAME_None)
     {
         UGameplayStatics::OpenLevel(

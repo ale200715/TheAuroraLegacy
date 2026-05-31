@@ -4,14 +4,11 @@
 #include "TheAuroraLegacyPawn.h"
 #include "EnemyBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "UI/LoreWidget.h"
-#include "UI/GameOverWidget.h"
 #include "Engine/World.h"
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
     PrimaryActorTick.bCanEverTick = true;
     DefaultPawnClass = ATheAuroraLegacyPawn::StaticClass();
-   
 }
 
 void ATheAuroraLegacyGameMode::BeginPlay()
@@ -39,6 +36,7 @@ void ATheAuroraLegacyGameMode::AddScore(int32 Amount)
     UE_LOG(LogTemp, Warning, TEXT("Puntuacion: %d"), Score);
 }
 
+
 void ATheAuroraLegacyGameMode::SpawnEnemy()
 {
     if (!EnemyClass) return;
@@ -59,6 +57,7 @@ void ATheAuroraLegacyGameMode::SpawnEnemy()
 
     UE_LOG(LogTemp, Warning, TEXT("Enemigo spawneado!"));
 }
+
 void ATheAuroraLegacyGameMode::OnEnemyDefeated(
     int32 ScoreValue)
 { 
