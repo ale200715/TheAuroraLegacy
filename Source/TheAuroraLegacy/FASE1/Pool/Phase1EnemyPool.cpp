@@ -32,7 +32,7 @@ void APhase1EnemyPool::BeginPlay()
         }
     }
 
-    for (int32 i = 0; i < 20; i++)
+    for (int32 i = 0; i < 50; i++)
     {
         if (ProjectileClass)
         {
