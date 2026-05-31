@@ -2,7 +2,6 @@
 
 
 #include "GameMode_Level1.h"
-
 #include "../Pool/Phase1EnemyPool.h"
 #include "../Enemies/EnemyDrone.h"
 #include "../Core/GameFacade.h"
@@ -93,6 +92,14 @@ void AGameMode_Level1::SpawnEnemy()
     Drone->SetActorEnableCollision(true);
     Drone->SetActorTickEnabled(true);
     Drone->Health = 1; 
+
+    // Reiniciar timer de disparo
+    AEnemyDrone* DroneCast =
+        Cast<AEnemyDrone>(Drone);
+    if (DroneCast)
+    {
+        DroneCast->RestartFireTimer();
+    }
 
     TotalSpawned++;
 

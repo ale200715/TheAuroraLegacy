@@ -54,7 +54,19 @@ void AEnemyProjectile::DeactivateSelf()
     SetActorEnableCollision(false);
     SetActorLocation(FVector::ZeroVector);
 }
+void AEnemyProjectile::ScheduleDeactivation(
+    float Delay)
+{
+    GetWorldTimerManager().ClearTimer(
+        DeactivateTimerHandle);
 
+    GetWorldTimerManager().SetTimer(
+        DeactivateTimerHandle,
+        this,
+        &AEnemyProjectile::DeactivateSelf,
+        Delay,
+        false);
+}
 void AEnemyProjectile::OnHit( UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     if (!OtherActor || OtherActor == this) return;

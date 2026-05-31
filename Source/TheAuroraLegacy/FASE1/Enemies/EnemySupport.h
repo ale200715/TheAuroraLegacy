@@ -39,7 +39,7 @@ private:
     float HorizontalLimit = 700.f;
 
     // ---- RALENTIZACION ----
-    float SlowRadius = 400.f;
+    float SlowRadius = 500.f;
     bool bIsSlowingPlayer = false;
     float OriginalPlayerSpeed = 0.f;
 

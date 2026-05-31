@@ -34,4 +34,10 @@ private:
 
     UFUNCTION()
     void OnHit(UPrimitiveComponent* HitComp,AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+public:
+    void ScheduleDeactivation(float Delay);
+
+private:
+    FTimerHandle DeactivateTimerHandle;
 };

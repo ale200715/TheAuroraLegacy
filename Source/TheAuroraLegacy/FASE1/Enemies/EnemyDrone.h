@@ -15,6 +15,7 @@ public:
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
     class UStaticMeshComponent* EnemyMesh;
+    void RestartFireTimer();
 
 protected:
     virtual void BeginPlay() override;

@@ -95,9 +95,12 @@ void AEnemyDrone::MoveEnemy(float DeltaTime)
         }
     }
 }
-
+/*/
 void AEnemyDrone::FireProjectile()
 {
+    UE_LOG(LogTemp, Warning,
+        TEXT("Drone: Intentando disparar..."));
+
     if (!LevelPool)
     {
         AActor* FoundActor =
@@ -127,7 +130,7 @@ void AEnemyDrone::FireProjectile()
     }
 
     Bullet->SetActorLocation(SpawnLocation);
-    Bullet->SetActorRotation(GetActorRotation());
+    Bullet->SetActorRotation(ShootRotation);
     Bullet->SetActorHiddenInGame(false);
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
@@ -143,6 +146,81 @@ void AEnemyDrone::FireProjectile()
     UE_LOG(LogTemp, Warning,
         TEXT("Drone: Proyectil disparado"));
 }
+/*/
+void AEnemyDrone::FireProjectile()
+{
+    UE_LOG(LogTemp, Warning,
+        TEXT("Drone: Intentando disparar..."));
+
+    if (!LevelPool)
+    {
+        AActor* FoundActor =
+            UGameplayStatics::GetActorOfClass(
+                GetWorld(),
+                APhase1EnemyPool::StaticClass());
+        LevelPool = Cast<APhase1EnemyPool>(
+            FoundActor);
+
+        if (!LevelPool)
+        {
+            UE_LOG(LogTemp, Error,
+                TEXT("Drone: Pool no encontrado"));
+            return;
+        }
+    }
+
+    AEnemyProjectile* Bullet =
+        LevelPool->GetProjectileFromPool();
+
+    if (!Bullet)
+    {
+        UE_LOG(LogTemp, Error,
+            TEXT("Drone: Sin proyectiles"));
+        return;
+    }
+
+    FVector SpawnLocation = GetActorLocation() +
+        FVector(100.f, 0.f, 0.f);
+
+    Bullet->SetActorLocation(SpawnLocation);
+    Bullet->SetActorRotation(
+        FRotator(0.f, 0.f, 0.f));
+    Bullet->SetActorHiddenInGame(false);
+    Bullet->SetActorTickEnabled(true);
+    Bullet->SetActorEnableCollision(true);
+
+    // Usar el timer del propio proyectil
+    // no una variable local
+    Bullet->ScheduleDeactivation(3.f);
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Drone: Proyectil disparado"));
+}
+void AEnemyDrone::RestartFireTimer()
+{
+    GetWorldTimerManager().ClearTimer(
+        FireTimerHandle);
+
+    // Recachear jugador
+    CachePlayer();
+
+    // Restaurar movimiento horizontal
+    // NO cambiar a dirección del jugador
+    MoveDirection = FVector(0.f, 1.f, 0.f);
+
+    // Reiniciar disparo
+    GetWorldTimerManager().SetTimer(
+        FireTimerHandle,
+        this,
+        &AEnemyDrone::FireProjectile,
+        FireRate,
+        true);
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Drone: Timer reiniciado"));
+}
+
+
 void AEnemyDrone::CachePlayer()
 {
     APawn* Player =

@@ -66,6 +66,18 @@ void AEnemySupport::Tick(float DeltaTime)
 
 void AEnemySupport::MoveEnemy(float DeltaTime)
 {
+
+    // Cuando se desactiva agregar:
+    if (bIsSlowingPlayer && CachedPlayer.IsValid())
+    {
+        ATheAuroraLegacyPawn* PlayerPawn =
+            Cast<ATheAuroraLegacyPawn>(
+                CachedPlayer.Get());
+        if (PlayerPawn && OriginalPlayerSpeed > 0.f)
+            PlayerPawn->SetMaxSpeed(OriginalPlayerSpeed);
+        bIsSlowingPlayer = false;
+    }
+
     FVector NewLocation = GetActorLocation();
     NewLocation.Y += MoveDirection *
         MoveSpeed * DeltaTime;
@@ -99,20 +111,16 @@ void AEnemySupport::CheckSlowRadius()
     if (Distance <= SlowRadius && !bIsSlowingPlayer)
     {
         // Usar getter en lugar de acceso directo
-        OriginalPlayerSpeed =
-            PlayerPawn->GetMaxSpeed();
+        OriginalPlayerSpeed = PlayerPawn->GetMaxSpeed();
         bIsSlowingPlayer = true;
-        PlayerPawn->SetMaxSpeed(
-            PlayerPawn->GetMaxSpeed() * 0.5f);
+        PlayerPawn->SetMaxSpeed( OriginalPlayerSpeed * 0.5f);
 
         UE_LOG(LogTemp, Warning,
             TEXT("Support: Jugador ralentizado"));
     }
-    else if (Distance > SlowRadius &&
-        bIsSlowingPlayer)
+    else if (Distance > SlowRadius && bIsSlowingPlayer)
     {
         bIsSlowingPlayer = false;
-        // Restaurar velocidad original
         PlayerPawn->SetMaxSpeed(OriginalPlayerSpeed);
 
         UE_LOG(LogTemp, Warning,
@@ -164,9 +172,6 @@ void AEnemySupport::FireProjectile()
         DeactivateDelegate,
         5.f,
         false);
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Support: Proyectil disparado"));
 }
 
 void AEnemySupport::OnDeath()
@@ -186,6 +191,8 @@ void AEnemySupport::OnDeath()
     }
 
     bIsSlowingPlayer = false;
+
+    OriginalPlayerSpeed = 0.f;
 
     TArray<AActor*> FoundFacades;
     UGameplayStatics::GetAllActorsOfClass(
