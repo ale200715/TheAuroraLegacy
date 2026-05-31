@@ -20,8 +20,7 @@ void UGameOverWidget::NativeConstruct()
             this, &UGameOverWidget::OnRestartClicked);
 
     // Mostrar cursor para los botones
-    APlayerController* PC =
-        GetWorld()->GetFirstPlayerController();
+    APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(true);

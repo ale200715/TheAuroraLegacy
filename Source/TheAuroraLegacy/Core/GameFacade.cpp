@@ -17,14 +17,12 @@ void AGameFacade::BeginPlay()
 
 UAuroraGameInstance* AGameFacade::GetGI()
 {
-    return Cast<UAuroraGameInstance>(
-        GetGameInstance());
+    return Cast<UAuroraGameInstance>(GetGameInstance());
 }
 
 ATheAuroraLegacyGameMode* AGameFacade::GetGM()
 {
-    return Cast<ATheAuroraLegacyGameMode>(
-        GetWorld()->GetAuthGameMode());
+    return Cast<ATheAuroraLegacyGameMode>(GetWorld()->GetAuthGameMode());
 }
 
 void AGameFacade::AddScore(int32 Amount)

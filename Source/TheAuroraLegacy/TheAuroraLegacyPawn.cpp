@@ -9,16 +9,13 @@
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 #include "TimerManager.h"
-#include "Player/PlayerProjectile.h"
 
 ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
 {
     struct FConstructorStatics
     {
-        ConstructorHelpers::FObjectFinderOptional
-            <UStaticMesh> PlaneMesh;
-        FConstructorStatics()
-            : PlaneMesh(TEXT("/Game/Flying/Meshes/UFO.UFO"))
+        ConstructorHelpers::FObjectFinderOptional <UStaticMesh> PlaneMesh;
+        FConstructorStatics() : PlaneMesh(TEXT("/Game/Flying/Meshes/UFO.UFO"))
         {
         }
     };
@@ -53,8 +50,7 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
     Lives = 3;
     bCanFire = true;
 
-    static ConstructorHelpers::FClassFinder<APlayerProjectile>
-        ProjectileBP(TEXT("/Game/Player/BP_PlayerProjectile"));
+    static ConstructorHelpers::FClassFinder<APlayerProjectile> ProjectileBP(TEXT("/Game/Player/BP_PlayerProjectile"));
     if (ProjectileBP.Class != nullptr)
     {
         ProjectileClass = ProjectileBP.Class;
@@ -63,8 +59,7 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
 
 void ATheAuroraLegacyPawn::Tick(float DeltaSeconds)
 {
-    const FVector LocalMove = FVector(
-        CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
+    const FVector LocalMove = FVector( CurrentForwardSpeed * DeltaSeconds, 0.f, 0.f);
 
     AddActorLocalOffset(LocalMove, true);
 
@@ -88,14 +83,10 @@ void ATheAuroraLegacyPawn::NotifyHit(
     FVector NormalImpulse,
     const FHitResult& Hit)
 {
-    Super::NotifyHit(MyComp, Other, OtherComp,
-        bSelfMoved, HitLocation, HitNormal,
-        NormalImpulse, Hit);
+    Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
     FRotator CurrentRotation = GetActorRotation();
-    SetActorRotation(FQuat::Slerp(
-        CurrentRotation.Quaternion(),
-        HitNormal.ToOrientationQuat(), 0.025f));
+    SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
 void ATheAuroraLegacyPawn::SetupPlayerInputComponent(
@@ -103,29 +94,13 @@ void ATheAuroraLegacyPawn::SetupPlayerInputComponent(
 {
     check(PlayerInputComponent);
 
-    PlayerInputComponent->BindAxis("Thrust", this,
-        &ATheAuroraLegacyPawn::ThrustInput);
-    PlayerInputComponent->BindAxis("MoveUp", this,
-        &ATheAuroraLegacyPawn::MoveUpInput);
-    PlayerInputComponent->BindAxis("MoveRight", this,
-        &ATheAuroraLegacyPawn::MoveRightInput);
+    PlayerInputComponent->BindAxis("Thrust", this, &ATheAuroraLegacyPawn::ThrustInput);
+    PlayerInputComponent->BindAxis("MoveUp", this, &ATheAuroraLegacyPawn::MoveUpInput);
+    PlayerInputComponent->BindAxis("MoveRight", this, &ATheAuroraLegacyPawn::MoveRightInput);
 
-    PlayerInputComponent->BindAction("Fire",
-        IE_Pressed, this,
-        &ATheAuroraLegacyPawn::Fire);
+    PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATheAuroraLegacyPawn::Fire);
 }
-/*/
-void ATheAuroraLegacyPawn::ThrustInput(float Val)
-{
-    bool bHasInput = !FMath::IsNearlyEqual(Val, 0.f);
-    float CurrentAcc = bHasInput ?
-        (Val * Acceleration) : (-0.5f * Acceleration);
-    float NewForwardSpeed = CurrentForwardSpeed +
-        (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-    CurrentForwardSpeed = FMath::Clamp(
-        NewForwardSpeed, MinSpeed, MaxSpeed);
-}
-/*/
+
 
 void ATheAuroraLegacyPawn::ThrustInput(float Val)
 {
@@ -134,40 +109,29 @@ void ATheAuroraLegacyPawn::ThrustInput(float Val)
     if (bHasInput)
     {
         float CurrentAcc = Val * Acceleration;
-        float NewForwardSpeed = CurrentForwardSpeed +
-            (GetWorld()->GetDeltaSeconds() * CurrentAcc);
-        CurrentForwardSpeed = FMath::Clamp(
-            NewForwardSpeed, -MaxSpeed, MaxSpeed);
+        float NewForwardSpeed = CurrentForwardSpeed +(GetWorld()->GetDeltaSeconds() * CurrentAcc);
+        CurrentForwardSpeed = FMath::Clamp(NewForwardSpeed, -MaxSpeed, MaxSpeed);
     }
     else
     {
-        CurrentForwardSpeed = FMath::FInterpTo(
-            CurrentForwardSpeed, 0.f,
-            GetWorld()->GetDeltaSeconds(), 5.f);
+        CurrentForwardSpeed = FMath::FInterpTo(CurrentForwardSpeed, 0.f, GetWorld()->GetDeltaSeconds(), 5.f);
     }
 }
 
 void ATheAuroraLegacyPawn::MoveUpInput(float Val)
 {
     float TargetPitchSpeed = (Val * TurnSpeed * -1.f);
-    TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed)
-        * -0.2f);
-    CurrentPitchSpeed = FMath::FInterpTo(
-        CurrentPitchSpeed, TargetPitchSpeed,
-        GetWorld()->GetDeltaSeconds(), 2.f);
+    TargetPitchSpeed += (FMath::Abs(CurrentYawSpeed) * -0.2f);
+    CurrentPitchSpeed = FMath::FInterpTo(CurrentPitchSpeed, TargetPitchSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ATheAuroraLegacyPawn::MoveRightInput(float Val)
 {
     float TargetYawSpeed = (Val * TurnSpeed);
-    CurrentYawSpeed = FMath::FInterpTo(
-        CurrentYawSpeed, TargetYawSpeed,
-        GetWorld()->GetDeltaSeconds(), 2.f);
+    CurrentYawSpeed = FMath::FInterpTo(CurrentYawSpeed, TargetYawSpeed, GetWorld()->GetDeltaSeconds(), 2.f);
 
     const bool bIsTurning = FMath::Abs(Val) > 0.2f;
-    float TargetRollSpeed = bIsTurning ?
-        (CurrentYawSpeed * 0.5f) :
-        (GetActorRotation().Roll * -2.f);
+    float TargetRollSpeed = bIsTurning ? (CurrentYawSpeed * 0.5f) :  (GetActorRotation().Roll * -2.f);
     CurrentRollSpeed = FMath::FInterpTo(
         CurrentRollSpeed, TargetRollSpeed,
         GetWorld()->GetDeltaSeconds(), 2.f);
@@ -179,36 +143,26 @@ void ATheAuroraLegacyPawn::Fire()
 
     if (!ProjectileClass)
     {
-        UE_LOG(LogTemp, Error,
-            TEXT("ProjectileClass es NULL!"));
+        UE_LOG(LogTemp, Error, TEXT("ProjectileClass es NULL!"));
         return;
     }
 
     if (!bCanFire)
     {
-        UE_LOG(LogTemp, Warning,
-            TEXT("No puede disparar aun"));
+        UE_LOG(LogTemp, Warning, TEXT("No puede disparar aun"));
         return;
     }
 
-    FVector SpawnLocation = GetActorLocation() +
-        GetActorForwardVector() * 150.f;
+    FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 150.f;
     FRotator SpawnRotation = GetActorRotation();
 
-    GetWorld()->SpawnActor<APlayerProjectile>(
-        ProjectileClass, SpawnLocation, SpawnRotation);
+    GetWorld()->SpawnActor<APlayerProjectile>( ProjectileClass, SpawnLocation, SpawnRotation);
 
     bCanFire = false;
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &ATheAuroraLegacyPawn::ResetFire,
-        FireRate,
-        false);
+    GetWorldTimerManager().SetTimer( FireTimerHandle, this, &ATheAuroraLegacyPawn::ResetFire, FireRate, false);
 }
 
-void ATheAuroraLegacyPawn::TakeDamage_Ship(
-    int32 DamageAmount)
+void ATheAuroraLegacyPawn::TakeDamage_Ship( int32 DamageAmount)
 {
     Lives -= DamageAmount;
 

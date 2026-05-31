@@ -35,34 +35,19 @@ void APlayerProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // Posición actual y siguiente
     FVector StartLocation = GetActorLocation();
 
     FVector NextLocation = StartLocation +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;
 
-    // LineTrace para detectar colisiones
     FHitResult HitResult;
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(this);
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(
-        HitResult,
-        StartLocation,
-        NextLocation,
-        ECollisionChannel::ECC_Visibility,
-        QueryParams);
+    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, NextLocation,  ECollisionChannel::ECC_Visibility, QueryParams);
 
-    // Línea de debug visible en pantalla
-    // para verificar que el raycast funciona
-    DrawDebugLine(
-        GetWorld(),
-        StartLocation,
-        NextLocation,
-        FColor::Red,
-        false,
-        0.1f);
+    DrawDebugLine( GetWorld(), StartLocation, NextLocation, FColor::Red, false, 0.1f);
 
     if (bHit)
     {
@@ -86,6 +71,5 @@ void APlayerProjectile::Tick(float DeltaTime)
         return;
     }
 
-    // Mover el proyectil
     SetActorLocation(NextLocation);
 }

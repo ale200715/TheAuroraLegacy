@@ -10,9 +10,7 @@ class THEAURORALEGACY_API ULoreWidget
     GENERATED_BODY()
 
 public:
-    void SetupLore(
-        FString Text,
-        FName NextLevelName);
+    void SetupLore( FString Text, FName NextLevelName);
 
 protected:
     virtual void NativeConstruct() override;
