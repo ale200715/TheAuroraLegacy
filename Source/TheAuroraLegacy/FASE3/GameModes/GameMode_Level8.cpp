@@ -21,6 +21,8 @@ AGameMode_Level8::AGameMode_Level8()
     SpawnPositions.Add(FVector(600.f, 3000.f, 0.f));
     SpawnPositions.Add(FVector(-400.f, 4000.f, 0.f));
     SpawnPositions.Add(FVector(400.f, 4000.f, 0.f));
+
+	NextLevelName = FName("Level9");
 }
 
 void AGameMode_Level8::BeginPlay()

@@ -20,6 +20,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
     GameFacadeInstance = Cast<AGameFacade>(FoundActor);
 
     GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ATheAuroraLegacyGameMode::SpawnEnemy, SpawnInterval, true);
+
 	
 }
 
