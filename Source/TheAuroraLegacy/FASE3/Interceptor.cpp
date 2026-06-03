@@ -4,6 +4,25 @@
 #include "Interceptor.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
+#include "../TheAuroraLegacyPawn.h"
+
+void AInterceptor::NotifyActorBeginOverlap(
+    AActor* OtherActor)
+{
+    Super::NotifyActorBeginOverlap(OtherActor);
+
+    ATheAuroraLegacyPawn* Player =
+        Cast<ATheAuroraLegacyPawn>(OtherActor);
+    if (Player)
+    {
+        Player->TakeDamage_Ship(ContactDamage);
+        UE_LOG(LogTemp, Warning,
+            TEXT("Interceptor golpeo al jugador"));
+
+        // Destruirse al impactar
+        Destroy();
+    }
+}
 
 AInterceptor::AInterceptor()
 {
@@ -20,11 +39,17 @@ AInterceptor::AInterceptor()
         <UStaticMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComponent;
 
-    // Habilitar colision para recibir disparos
+    // Colision
+    SetActorEnableCollision(true);
     MeshComponent->SetCollisionEnabled(
         ECollisionEnabled::QueryAndPhysics);
+    MeshComponent->SetCollisionObjectType(
+        ECC_WorldDynamic);
+    MeshComponent->SetCollisionResponseToAllChannels(
+        ECR_Overlap);
     MeshComponent->SetCollisionResponseToChannel(
         ECC_Visibility, ECR_Block);
+    MeshComponent->SetGenerateOverlapEvents(true);
 }
 
 void AInterceptor::BeginPlay()
@@ -63,9 +88,27 @@ void AInterceptor::MoveEnemy(float DeltaTime)
     FVector DiagonalDir = FVector(
         ToPlayer.X + (bGoingRight ? 0.5f : -0.5f),
         ToPlayer.Y,
-        0.f).GetSafeNormal();
+        ToPlayer.Z
+       ).GetSafeNormal();
 
     FVector NewLocation = MyLocation +
         DiagonalDir * MoveSpeed * DeltaTime;
     SetActorLocation(NewLocation);
+
+    // Detectar contacto por distancia
+    float Distance = FVector::Dist(
+        MyLocation, PlayerLocation);
+
+    if (Distance < 150.f)
+    {
+        ATheAuroraLegacyPawn* Player =
+            Cast<ATheAuroraLegacyPawn>(PlayerActor);
+        if (Player)
+        {
+            Player->TakeDamage_Ship(ContactDamage);
+            UE_LOG(LogTemp, Warning,
+                TEXT("Interceptor contacto con jugador"));
+            Destroy();
+        }
+    }
 }

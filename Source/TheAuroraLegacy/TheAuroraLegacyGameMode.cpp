@@ -20,7 +20,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
         this,
         &ATheAuroraLegacyGameMode::SpawnEnemy,
         SpawnInterval,
-        true  // loop
+        true  
     );
 	
 }
