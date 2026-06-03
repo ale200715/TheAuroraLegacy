@@ -13,25 +13,19 @@ AEnemyDrone::AEnemyDrone()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    EnemyMesh = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("DroneMesh"));
+    EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("DroneMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder
-        <UStaticMesh> DroneMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    static ConstructorHelpers::FObjectFinder <UStaticMesh> DroneMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
 
     if (DroneMeshAsset.Succeeded())
     {
-        EnemyMesh->SetStaticMesh(
-            DroneMeshAsset.Object);
-        EnemyMesh->SetWorldScale3D(
-            FVector(0.5f, 0.5f, 0.5f));
+        EnemyMesh->SetStaticMesh(DroneMeshAsset.Object);
+        EnemyMesh->SetWorldScale3D( FVector(0.5f, 0.5f, 0.5f));
     }
    
-    EnemyMesh->SetCollisionEnabled(
-        ECollisionEnabled::QueryAndPhysics);
-    EnemyMesh->SetCollisionProfileName(
-        TEXT("BlockAll"));
+    EnemyMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    EnemyMesh->SetCollisionProfileName(TEXT("BlockAll"));
 
     Health = 1;
     MoveSpeed = 350.f;
@@ -43,18 +37,23 @@ AEnemyDrone::AEnemyDrone()
 void AEnemyDrone::BeginPlay()
 {
     Super::BeginPlay();
-
     CachePlayer();
+    FindPool();
 
     MoveDirection = FVector(0.f, 1.f, 0.f);
 
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemyDrone::FireProjectile,
-        FireRate,
-        true);
+    GetWorldTimerManager().SetTimer( FireTimerHandle,this,&AEnemyDrone::FireProjectile, FireRate,true);
 }
+
+void AEnemyDrone::CachePlayer()
+{
+    APawn* Player =
+        UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (Player) {
+        CachedPlayer = Player;
+    }
+}
+
 
 void AEnemyDrone::Tick(float DeltaTime)
 {
@@ -63,8 +62,13 @@ void AEnemyDrone::Tick(float DeltaTime)
 
 void AEnemyDrone::MoveEnemy(float DeltaTime)
 {
-    FVector NewLocation = GetActorLocation() +
-        MoveDirection * MoveSpeed * DeltaTime;
+    if (!CachedPlayer.IsValid())
+    {
+        CachePlayer();
+        return;
+    }
+
+    FVector NewLocation = GetActorLocation() + MoveDirection * MoveSpeed * DeltaTime;
 
     if (NewLocation.Y > 700.f)
     {
@@ -76,193 +80,73 @@ void AEnemyDrone::MoveEnemy(float DeltaTime)
     }
 
     SetActorLocation(NewLocation);
-
-    if (CachedPlayer.IsValid())
-    {
-        float Distance = FVector::Dist(GetActorLocation(), CachedPlayer->GetActorLocation());
-
-        if (Distance > 3000.f)
-        {
-            SetActorHiddenInGame(true);
-            SetActorTickEnabled(false);
-            SetActorEnableCollision(false);
-            GetWorldTimerManager().ClearTimer(
-                FireTimerHandle);
-
-            UE_LOG(LogTemp, Warning,
-                TEXT("Drone: Salio del rango "
-                    "y se desactivo"));
-        }
-    }
 }
-/*/
+
 void AEnemyDrone::FireProjectile()
 {
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Intentando disparar..."));
-
     if (!LevelPool)
     {
-        AActor* FoundActor =
-            UGameplayStatics::GetActorOfClass(
-                GetWorld(),
-                APhase1EnemyPool::StaticClass());
+        AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), APhase1EnemyPool::StaticClass());
         LevelPool = Cast<APhase1EnemyPool>(FoundActor);
     }
 
-    if (!LevelPool) return;
+    AEnemyProjectile* Bullet = LevelPool->GetProjectileFromPool();
 
-    AEnemyProjectile* Bullet =
-        LevelPool->GetProjectileFromPool();
-
-    if (!Bullet) return;
-
-    FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
-
-    FRotator ShootRotation = GetActorRotation();
-    if (CachedPlayer.IsValid())
-    {
-        FVector Direction =
-            CachedPlayer->GetActorLocation() -
-            GetActorLocation();
-        Direction.Normalize();
-        ShootRotation = Direction.Rotation();
-    }
+    FVector SpawnLocation = GetActorLocation() + FVector(100.f, 0.f, 0.f);
 
     Bullet->SetActorLocation(SpawnLocation);
-    Bullet->SetActorRotation(ShootRotation);
+    Bullet->SetActorRotation(FRotator(0.f, 0.f, 0.f));
+
     Bullet->SetActorHiddenInGame(false);
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
 
-    FTimerHandle DeactivateTimer;
-    FTimerDelegate DeactivateDelegate;
-    DeactivateDelegate.BindUObject(
-        Bullet,
-        &AEnemyProjectile::DeactivateSelf);
-
-    GetWorldTimerManager().SetTimer( DeactivateTimer, DeactivateDelegate, 3.f, false);
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Proyectil disparado"));
-}
-/*/
-void AEnemyDrone::FireProjectile()
-{
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Intentando disparar..."));
-
-    if (!LevelPool)
-    {
-        AActor* FoundActor =
-            UGameplayStatics::GetActorOfClass(
-                GetWorld(),
-                APhase1EnemyPool::StaticClass());
-        LevelPool = Cast<APhase1EnemyPool>(
-            FoundActor);
-
-        if (!LevelPool)
-        {
-            UE_LOG(LogTemp, Error,
-                TEXT("Drone: Pool no encontrado"));
-            return;
-        }
-    }
-
-    AEnemyProjectile* Bullet =
-        LevelPool->GetProjectileFromPool();
-
-    if (!Bullet)
-    {
-        UE_LOG(LogTemp, Error,
-            TEXT("Drone: Sin proyectiles"));
-        return;
-    }
-
-    FVector SpawnLocation = GetActorLocation() +
-        FVector(100.f, 0.f, 0.f);
-
-    Bullet->SetActorLocation(SpawnLocation);
-    Bullet->SetActorRotation(
-        FRotator(0.f, 0.f, 0.f));
-    Bullet->SetActorHiddenInGame(false);
-    Bullet->SetActorTickEnabled(true);
-    Bullet->SetActorEnableCollision(true);
-
-    // Usar el timer del propio proyectil
-    // no una variable local
     Bullet->ScheduleDeactivation(3.f);
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Proyectil disparado"));
 }
+
 void AEnemyDrone::RestartFireTimer()
 {
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
-    // Recachear jugador
-    CachePlayer();
-
-    // Restaurar movimiento horizontal
-    // NO cambiar a dirección del jugador
     MoveDirection = FVector(0.f, 1.f, 0.f);
 
-    // Reiniciar disparo
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemyDrone::FireProjectile,
-        FireRate,
-        true);
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone: Timer reiniciado"));
+    GetWorldTimerManager().SetTimer(FireTimerHandle,this, &AEnemyDrone::FireProjectile,FireRate, true);
 }
 
-
-void AEnemyDrone::CachePlayer()
-{
-    APawn* Player =
-        UGameplayStatics::GetPlayerPawn(
-            GetWorld(), 0);
-    if (Player)
-        CachedPlayer = Player;
-}
 
 void AEnemyDrone::OnDeath()
 {
-    UE_LOG(LogTemp, Warning,
-        TEXT("Drone muerto - regresando al pool"));
+    UE_LOG(LogTemp, Warning, TEXT("Drone muerto - regresando al pool"));
 
     TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(
-        GetWorld(),
-        AGameFacade::StaticClass(),
-        FoundFacades);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameFacade::StaticClass(), FoundFacades);
 
     if (FoundFacades.Num() > 0)
     {
-        AGameFacade* Facade =
-            Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
+        AGameFacade* Facade =Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade) {
             Facade->NotifyEnemyDefeated(this);
+        }
     }
 
-    ATheAuroraLegacyGameMode* GM =
-        Cast<ATheAuroraLegacyGameMode>(
-            GetWorld()->GetAuthGameMode());
-    if (GM)
+    ATheAuroraLegacyGameMode* GM = Cast<ATheAuroraLegacyGameMode>(GetWorld()->GetAuthGameMode());
+    if (GM) {
         GM->OnEnemyDefeated(ScoreValue);
+    }
 
-    
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);
     SetActorLocation(FVector::ZeroVector);
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
-    // Restaurar vida para cuando se reactive
     Health = 1;
+}
+
+void AEnemyDrone::FindPool()
+{
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), APhase1EnemyPool::StaticClass());
+
+    LevelPool = Cast<APhase1EnemyPool>(FoundActor);
 }

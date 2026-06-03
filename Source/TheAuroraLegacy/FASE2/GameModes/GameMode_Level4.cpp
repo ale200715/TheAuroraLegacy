@@ -55,7 +55,7 @@ void AGameMode_Level4::SpawnEnemyGroup()
     if (GEngine)
     {
         GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-            FString::Printf(TEXT("¡Nuevo grupo de enemigos! Faltan derrotar: %d"), Remaining));
+            FString::Printf(TEXT("ï¿½Nuevo grupo de enemigos! Faltan derrotar: %d"), Remaining));
     }
 }
 
@@ -82,7 +82,7 @@ void AGameMode_Level4::OnEnemyDefeated()
         if (GEngine)
         {
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow,
-                TEXT("¡NIVEL 4 COMPLETADO!"));
+                TEXT("ï¿½NIVEL 4 COMPLETADO!"));
         }
         UE_LOG(LogTemp, Warning, TEXT("NIVEL 4 COMPLETADO!"));
         GetWorldTimerManager().ClearTimer(SpawnTimerHandle);

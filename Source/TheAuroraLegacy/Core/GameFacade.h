@@ -6,8 +6,7 @@
 class UAuroraGameInstance;
 class ATheAuroraLegacyGameMode;
 
-UENUM(BlueprintType)
-enum class EEnemyType : uint8
+UENUM(BlueprintType) enum class EEnemyType : uint8
 {
     // Fase 1
     Drone,
@@ -38,9 +37,6 @@ public:
     void LoseLife();
 
     UFUNCTION(BlueprintCallable, Category = "Facade")
-    void SpawnEnemy();
-
-    UFUNCTION(BlueprintCallable, Category = "Facade")
     void SaveGame();
 
     UFUNCTION(BlueprintCallable, Category = "Facade")
@@ -50,40 +46,19 @@ public:
     void TriggerGameOver();
 
     UFUNCTION(BlueprintCallable, Category = "Facade")
-    void RegisterEnemyClass(
-        EEnemyType Type,
-        TSubclassOf<class AEnemyBase> EnemyClass);
+    void RegisterEnemyClass( EEnemyType Type,TSubclassOf<class AEnemyBase> EnemyClass);
 
-    UFUNCTION(BlueprintCallable, Category = "Facade")
-    void SpawnWave(
-        EEnemyType Type,
-        int32 Count,
-        FVector CenterLocation);
-
-    void NotifyEnemyDefeated(
-        class AEnemyBase* Enemy);
-
-    UFUNCTION(BlueprintCallable, Category = "Facade")
-    void ClearAllEnemies();
-
-    UFUNCTION(BlueprintCallable, Category = "Facade")
-    int32 GetDefeatedCount() const;
-
-    UFUNCTION(BlueprintCallable, Category = "Facade")
-    bool HasActiveEnemies() const;
+    void NotifyEnemyDefeated(class AEnemyBase* Enemy);
 
 private:
     UAuroraGameInstance* GetGI();
     ATheAuroraLegacyGameMode* GetGM();
-    TMap<EEnemyType, TSubclassOf<class AEnemyBase>>
-        EnemyClasses;
+    TMap<EEnemyType, TSubclassOf<class AEnemyBase>>EnemyClasses;
 
     UPROPERTY()
     TArray<class AEnemyBase*> ActiveEnemies;
 
     int32 DefeatedCount = 0;
 
-    void ConfigureEnemy(
-        class AEnemyBase* Enemy,
-        EEnemyType Type);
+    void ConfigureEnemy(class AEnemyBase* Enemy,EEnemyType Type);
 };

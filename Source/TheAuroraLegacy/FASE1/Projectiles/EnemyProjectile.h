@@ -23,7 +23,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     float Speed = 1800.f;
 
-    UPROPERTY(EditAnywhere, Category = "Combat")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
     int32 Damage = 1;
 
 protected:

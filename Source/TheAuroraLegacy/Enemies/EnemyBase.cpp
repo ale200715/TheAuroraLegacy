@@ -18,9 +18,6 @@ void AEnemyBase::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // Llamar al movimiento virtual
-    // Cada enemigo sobreescribe MoveEnemy
-    // con su propio comportamiento
     if (IsAlive())
     {
         MoveEnemy(DeltaTime);
@@ -29,18 +26,13 @@ void AEnemyBase::Tick(float DeltaTime)
 
 void AEnemyBase::MoveEnemy(float DeltaTime)
 {
-    // La base no hace nada
-    // Cada enemigo sobreescribe esto
 }
 
-void AEnemyBase::TakeDamageEnemy(
-    int32 DamageAmount)
+void AEnemyBase::TakeDamageEnemy(int32 DamageAmount)
 {
     Health -= DamageAmount;
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Enemigo recibio daño. "
-            "Vida restante: %d"), Health);
+    UE_LOG(LogTemp, Warning, TEXT("Enemigo recibio daño. Vida restante: %d"), Health);
 
     if (Health <= 0)
     {

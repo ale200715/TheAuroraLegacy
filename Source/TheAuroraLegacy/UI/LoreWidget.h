@@ -4,8 +4,7 @@
 #include "LoreWidget.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API ULoreWidget
-    : public UUserWidget
+class THEAURORALEGACY_API ULoreWidget: public UUserWidget
 {
     GENERATED_BODY()
 

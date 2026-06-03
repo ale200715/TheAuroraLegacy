@@ -28,7 +28,7 @@ public:
     UFUNCTION()
     void OnEnemyDefeated();
 
-    // Observer — el HUD o cualquier clase puede suscribirse
+    // Observer ï¿½ el HUD o cualquier clase puede suscribirse
     UPROPERTY(BlueprintAssignable, Category = "Observer")
     FOnEnemyCountChanged OnEnemyCountChanged;
 

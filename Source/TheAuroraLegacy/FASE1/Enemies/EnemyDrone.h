@@ -4,8 +4,7 @@
 #include "EnemyDrone.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AEnemyDrone
-    : public AEnemyBase
+class THEAURORALEGACY_API AEnemyDrone: public AEnemyBase
 {
     GENERATED_BODY()
 
@@ -26,8 +25,9 @@ protected:
     float FireRate = 2.0f;
 
 private:
+    TWeakObjectPtr<APawn> CachedPlayer;
     FVector MoveDirection;
     void FireProjectile();
-    TWeakObjectPtr<APawn> CachedPlayer;
     void CachePlayer();
+    void FindPool();
 };

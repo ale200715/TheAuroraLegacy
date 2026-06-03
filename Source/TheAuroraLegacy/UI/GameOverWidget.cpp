@@ -19,7 +19,6 @@ void UGameOverWidget::NativeConstruct()
         RestartButton->OnClicked.AddDynamic(
             this, &UGameOverWidget::OnRestartClicked);
 
-    // Mostrar cursor para los botones
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
@@ -28,20 +27,13 @@ void UGameOverWidget::NativeConstruct()
     }
 }
 
-void UGameOverWidget::SetupGameOver(
-    int32 LevelWhenDied,
-    int32 PhaseWhenDied,
-    FName CurrentLevelName)
+void UGameOverWidget::SetupGameOver( int32 LevelWhenDied, int32 PhaseWhenDied,FName CurrentLevelName)
 {
     CurrentLevel = CurrentLevelName;
 
     if (LevelText)
     {
-        FString Text = FString::Printf(
-            TEXT("Caíste en el Nivel %d"),
-            LevelWhenDied);
-        LevelText->SetText(
-            FText::FromString(Text));
+        FString Text = FString::Printf( TEXT("Caíste en el Nivel %d"), LevelWhenDied); LevelText->SetText( FText::FromString(Text));
     }
 
     if (GameOverMessage)

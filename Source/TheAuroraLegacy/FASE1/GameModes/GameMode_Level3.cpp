@@ -63,14 +63,7 @@ void AGameMode_Level3::SpawnEnemy()
         if (!Level3Pool) return;
     }
 
-    AEnemyBase* Support =
-        Level3Pool->GetEnemyFromPool();
-
-    if (!Support)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Level3: Pool sin supports"));
-        return;
-    }
+    AEnemyBase* Support = Level3Pool->GetEnemyFromPool();
 
     APawn* Player = UGameplayStatics::GetPlayerPawn( GetWorld(), 0);
 
@@ -92,8 +85,7 @@ void AGameMode_Level3::SpawnEnemy()
     Support->Health = 2;
 
     AEnemySupport* SupportCast = Cast<AEnemySupport>(Support);
-    if (SupportCast) {
-        SupportCast->RestartFireTimer();
+    if (SupportCast) { SupportCast->RestartFireTimer();
     }
 
     TotalSpawned++;
@@ -107,12 +99,4 @@ void AGameMode_Level3::FindPool()
 
     Level3Pool = Cast<APhase1EnemyPool>(FoundActor);
 
-    if (Level3Pool) {
-
-        UE_LOG(LogTemp, Warning, TEXT("Level3: Pool encontrado"));
-    }
-    else {
-
-        UE_LOG(LogTemp, Error, TEXT("Level3: No se encontro el Pool"));
-    }
 }

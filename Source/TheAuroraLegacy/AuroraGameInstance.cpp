@@ -24,9 +24,7 @@ void UAuroraGameInstance::ResetStats()
 
 void UAuroraGameInstance::SaveGame()
 {
-    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>(
-        UGameplayStatics::CreateSaveGameObject(
-            UAuroraSaveGame::StaticClass()));
+    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>( UGameplayStatics::CreateSaveGameObject( UAuroraSaveGame::StaticClass()));
 
     SaveData->SavedScore = Score;
     SaveData->SavedLives = Lives;
@@ -38,8 +36,7 @@ void UAuroraGameInstance::SaveGame()
 
 void UAuroraGameInstance::LoadGame()
 {
-    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>(
-        UGameplayStatics::LoadGameFromSlot(TEXT("AuroraSlot"), 0));
+    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("AuroraSlot"), 0));
 
     if (SaveData)
     {
