@@ -1,14 +1,15 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "TheAuroraLegacyGameMode.h"
 #include "TheAuroraLegacyPawn.h"
-#include "EnemyBase.h"
+#include "AuroraGameInstance.h"
+#include "UI/GoodEndingWidget.h"
+#include "Core/GameFacade.h"
 #include "Kismet/GameplayStatics.h"
-#include "../Core/GameFacade.h"
 #include "Engine/World.h"
+
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false; // no usamos Tick en el GameMode
     DefaultPawnClass = ATheAuroraLegacyPawn::StaticClass();
 }
 
@@ -16,67 +17,93 @@ void ATheAuroraLegacyGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AGameFacade::StaticClass());
-    GameFacadeInstance = Cast<AGameFacade>(FoundActor);
+    // Buscar el Facade que debe existir en la escena como Actor
+    AActor* Found = UGameplayStatics::GetActorOfClass(
+        GetWorld(), AGameFacade::StaticClass());
+    GameFacadeInstance = Cast<AGameFacade>(Found);
 
-    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ATheAuroraLegacyGameMode::SpawnEnemy, SpawnInterval, true);
+    if (!GameFacadeInstance)
+    {
+        UE_LOG(LogTemp, Error,
+            TEXT("GameMode: NO se encontró GameFacade en la escena. "
+                "Agrégalo como Actor en el nivel."));
+    }
 
-	
+    // Arrancar el timer de spawn — los hijos sobreescriben SpawnEnemy()
+    GetWorldTimerManager().SetTimer(
+        SpawnTimerHandle,
+        this,
+        &ATheAuroraLegacyGameMode::SpawnEnemy,
+        SpawnInterval,
+        true);
 }
 
-void ATheAuroraLegacyGameMode::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
-
+// ── Spawn ─────────────────────────────────────────────────────────────────────
 
 void ATheAuroraLegacyGameMode::SpawnEnemy()
 {
-    
+    // Base vacía — cada hijo implementa su lógica de spawn
 }
 
-void ATheAuroraLegacyGameMode::OnEnemyDefeated( int32 ScoreValue)
-{ 
-    EnemiesDefeated++;
-    
-    if (GameFacadeInstance)
-    {
-        GameFacadeInstance->AddScore(ScoreValue);
-    }
+// ── Flujo del nivel ───────────────────────────────────────────────────────────
 
-    UE_LOG(LogTemp, Warning, TEXT("Enemigos: %d / %d"), EnemiesDefeated, EnemiesRequired);
+void ATheAuroraLegacyGameMode::OnEnemyDefeated(int32 ScoreValue)
+{
+    EnemiesDefeated++;
+
+    // NOTA: el score ya fue sumado por el Facade en NotifyEnemyDefeated().
+    // No llamar AddScore() aquí — evita doblar el score.
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("GameMode: %d / %d enemigos derrotados"),
+        EnemiesDefeated, EnemiesRequired);
 
     CheckLevelComplete();
-  
 }
+
 void ATheAuroraLegacyGameMode::CheckLevelComplete()
 {
-    if (EnemiesDefeated >= EnemiesRequired)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Nivel completado!"));
+    if (EnemiesDefeated < EnemiesRequired) return;
 
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+    GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
 
-        FTimerHandle CompleteTimer;
-        GetWorldTimerManager().SetTimer(CompleteTimer, this, &ATheAuroraLegacyGameMode::LoadNextLevel,2.f, false);
-    }
+    UE_LOG(LogTemp, Warning, TEXT("GameMode: Nivel completado!"));
+
+    // Level9 sobreescribe CheckLevelComplete() para llamar ShowGoodEnding().
+    // El resto de niveles llega aquí y carga el siguiente nivel.
+    FTimerHandle TransitionTimer;
+    GetWorldTimerManager().SetTimer(
+        TransitionTimer,
+        this,
+        &ATheAuroraLegacyGameMode::LoadNextLevel,
+        2.f,
+        false);
 }
 
 void ATheAuroraLegacyGameMode::LoadNextLevel()
 {
+    // Actualizar CurrentLevel en el GameInstance antes de cambiar de mapa
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+    {
+        GI->CurrentLevel++;
+    }
+
     if (NextLevelName != NAME_None)
     {
         UGameplayStatics::OpenLevel(this, NextLevelName);
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("No hay siguiente nivel definido"));
+        UE_LOG(LogTemp, Warning,
+            TEXT("GameMode: NextLevelName no definido en este nivel."));
     }
 }
 
+// ── Muerte del jugador ────────────────────────────────────────────────────────
+
 void ATheAuroraLegacyGameMode::OnPlayerDeath()
 {
-    GetWorldTimerManager().ClearTimer( SpawnTimerHandle);
+    GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
     ShowGameOver();
 }
 
@@ -84,18 +111,48 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
 {
     if (!GameOverWidgetClass) return;
 
-    UGameOverWidget* GOWidget = CreateWidget<UGameOverWidget>( GetWorld(), GameOverWidgetClass);
+    UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(
+        GetWorld(), GameOverWidgetClass);
 
-    if (GOWidget)
+    if (!Widget) return;
+
+    // PhaseNumber y CurrentLevel ahora son dinámicos — no más hardcoding
+    int32 CurrentLevel = 1;
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+        CurrentLevel = GI->CurrentLevel;
+
+    Widget->SetupGameOver(
+        CurrentLevel,
+        PhaseNumber,
+        FName(*GetWorld()->GetMapName()));
+
+    Widget->AddToViewport();
+
+    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+    if (PC)
     {
-        GOWidget->SetupGameOver( 1, 1,FName(*GetWorld()->GetMapName()));
-        GOWidget->AddToViewport();
+        PC->SetShowMouseCursor(true);
+        PC->SetInputMode(FInputModeUIOnly());
+    }
+}
 
-        APlayerController* PC =UGameplayStatics::GetPlayerController(this, 0);
-        if (PC)
-        {
-            PC->SetShowMouseCursor(true);
-            PC->SetInputMode(FInputModeUIOnly());
-        }
+// ── Good Ending (solo Level9 llega aquí) ─────────────────────────────────────
+
+void ATheAuroraLegacyGameMode::ShowGoodEnding()
+{
+    if (!GoodEndingWidgetClass) return;
+
+    UGoodEndingWidget* Widget = CreateWidget<UGoodEndingWidget>(
+        GetWorld(), GoodEndingWidgetClass);
+
+    if (!Widget) return;
+
+    Widget->AddToViewport();
+
+    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+    if (PC)
+    {
+        PC->SetShowMouseCursor(true);
+        PC->SetInputMode(FInputModeUIOnly());
     }
 }

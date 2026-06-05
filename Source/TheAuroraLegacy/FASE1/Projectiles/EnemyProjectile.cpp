@@ -29,7 +29,7 @@ AEnemyProjectile::AEnemyProjectile()
     if (SphereMesh.Succeeded())
     {
         ProjectileMesh->SetStaticMesh(SphereMesh.Object);
-        ProjectileMesh->SetWorldScale3D(FVector(0.5f, 0.5f, 0.5f));
+        ProjectileMesh->SetWorldScale3D(FVector(0.3f, 0.3f, 0.3f));
     }
 }
 

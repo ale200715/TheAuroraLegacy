@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "TheAuroraLegacyGameMode.h"
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 #include "TimerManager.h"
@@ -143,11 +144,19 @@ void ATheAuroraLegacyPawn::Fire()
 void ATheAuroraLegacyPawn::TakeDamage_Ship( int32 DamageAmount)
 {
     Lives -= DamageAmount;
-
     if (Lives <= 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Game Over - Sin vidas"));
         Destroy();
+        if (UWorld* World = GetWorld())
+        {
+            ATheAuroraLegacyGameMode* GameMode = Cast<ATheAuroraLegacyGameMode>(World->GetAuthGameMode());
+
+            if (GameMode)
+            {
+                GameMode->OnPlayerDeath();
+            }
+        }
     }
     else
     {

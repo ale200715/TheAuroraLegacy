@@ -118,7 +118,7 @@ void AEnemyDrone::RestartFireTimer()
 void AEnemyDrone::OnDeath()
 {
     UE_LOG(LogTemp, Warning, TEXT("Drone muerto - regresando al pool"));
-
+    
     TArray<AActor*> FoundFacades;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameFacade::StaticClass(), FoundFacades);
 
@@ -130,11 +130,7 @@ void AEnemyDrone::OnDeath()
         }
     }
 
-    ATheAuroraLegacyGameMode* GM = Cast<ATheAuroraLegacyGameMode>(GetWorld()->GetAuthGameMode());
-    if (GM) {
-        GM->OnEnemyDefeated(ScoreValue);
-    }
-
+    Super::OnDeath();
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);

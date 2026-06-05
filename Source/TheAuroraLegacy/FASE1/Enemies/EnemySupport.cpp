@@ -173,11 +173,6 @@ void AEnemySupport::OnDeath()
             
     }
 
-    ATheAuroraLegacyGameMode* GM =Cast<ATheAuroraLegacyGameMode>( GetWorld()->GetAuthGameMode());
-    if (GM) {
-       GM->OnEnemyDefeated(ScoreValue);
-    }
-
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);

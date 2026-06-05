@@ -24,20 +24,6 @@ void AGameMode_Level2::BeginPlay()
         Level2Pool->EnemyClass = AEnemyHunter::StaticClass(); 
         Level2Pool->InitializePool();
     }
-
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass( GetWorld(), AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
-        {
-            Facade->RegisterEnemyClass( EEnemyType::Hunter, AEnemyHunter::StaticClass());
-
-        }
-    }
-
     Super::BeginPlay();
 
     UE_LOG(LogTemp, Warning, TEXT("Level2: Iniciado. Derrotar %d hunters para pasar"), EnemiesRequired);

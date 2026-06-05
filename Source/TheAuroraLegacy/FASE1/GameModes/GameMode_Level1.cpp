@@ -27,20 +27,6 @@ void AGameMode_Level1::BeginPlay()
         Level1Pool->InitializePool();
     }
 
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
-        {
-            Facade->RegisterEnemyClass(EEnemyType::Drone, AEnemyDrone::StaticClass());
-
-            UE_LOG(LogTemp, Warning, TEXT("Level1: Drone registrado en el Facade"));
-        }
-    }
-
     Super::BeginPlay();
 
     UE_LOG(LogTemp, Warning,TEXT("Level1: Iniciado. Derrotar %d drones para pasar"), EnemiesRequired);
