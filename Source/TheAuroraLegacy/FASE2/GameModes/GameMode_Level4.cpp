@@ -6,6 +6,9 @@
 AGameMode_Level4::AGameMode_Level4()
 {
     PrimaryActorTick.bCanEverTick = false;
+
+    EnemiesRequired = 10;
+    NextLevelName = FName("Level5");
 }
 
 void AGameMode_Level4::BeginPlay()
@@ -25,7 +28,7 @@ void AGameMode_Level4::BeginPlay()
 void AGameMode_Level4::SpawnEnemyGroup()
 {
     if (!EnemyClass) return;
-    if (EnemiesDefeated >= EnemiesToDefeat) return;
+    if (EnemiesDefeated >= EnemiesRequired) return;
 
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
@@ -48,7 +51,7 @@ void AGameMode_Level4::SpawnEnemyGroup()
     // Observer notifica
     OnEnemyGroupSpawned.Broadcast(3);
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
     OnEnemyCountChanged.Broadcast(Remaining);
 
     // Mostrar en pantalla
@@ -64,7 +67,7 @@ void AGameMode_Level4::OnEnemyDefeated()
     EnemiesDefeated++;
     ActiveEnemies--;
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
 
     // Observer notifica
     OnEnemyCountChanged.Broadcast(Remaining);
@@ -74,10 +77,10 @@ void AGameMode_Level4::OnEnemyDefeated()
     {
         GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
             FString::Printf(TEXT("Enemigo destruido! Faltan: %d/%d"),
-                Remaining, EnemiesToDefeat));
+                Remaining, EnemiesRequired));
     }
 
-    if (EnemiesDefeated >= EnemiesToDefeat)
+    if (EnemiesDefeated >= EnemiesRequired)
     {
         if (GEngine)
         {
@@ -86,5 +89,7 @@ void AGameMode_Level4::OnEnemyDefeated()
         }
         UE_LOG(LogTemp, Warning, TEXT("NIVEL 4 COMPLETADO!"));
         GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+        LoadNextLevel();
     }
 }

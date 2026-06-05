@@ -1,6 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "../../TheAuroraLegacyGameMode.h"
 #include "GameMode_Level4.generated.h"
 
 // Observer Delegates
@@ -8,7 +8,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyCountChanged, int32, Remaini
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyGroupSpawned, int32, GroupSize);
 
 UCLASS()
-class THEAURORALEGACY_API AGameMode_Level4 : public AGameModeBase
+class THEAURORALEGACY_API AGameMode_Level4 : public ATheAuroraLegacyGameMode
 {
     GENERATED_BODY()
 
@@ -16,19 +16,12 @@ public:
     AGameMode_Level4();
     virtual void BeginPlay() override;
 
-    UPROPERTY(EditAnywhere, Category = "Spawner")
-    TSubclassOf<class AInfantryEnemy> EnemyClass;
-
-    UPROPERTY(BlueprintReadOnly, Category = "Stats")
-    int32 EnemiesDefeated = 0;
-
-    UPROPERTY(EditAnywhere, Category = "Stats")
-    int32 EnemiesToDefeat = 10;
+    // Enemigos a derrotar en este nivel 
 
     UFUNCTION()
     void OnEnemyDefeated();
 
-    // Observer — el HUD o cualquier clase puede suscribirse
+    // Observer
     UPROPERTY(BlueprintAssignable, Category = "Observer")
     FOnEnemyCountChanged OnEnemyCountChanged;
 
@@ -36,7 +29,6 @@ public:
     FOnEnemyGroupSpawned OnEnemyGroupSpawned;
 
 private:
-    FTimerHandle SpawnTimerHandle;
     int32 ActiveEnemies = 0;
     void SpawnEnemyGroup();
-};
+}; 

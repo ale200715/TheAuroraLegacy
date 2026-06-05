@@ -6,6 +6,9 @@
 AGameMode_Level6::AGameMode_Level6()
 {
     PrimaryActorTick.bCanEverTick = false;
+
+    EnemiesRequired = 5;
+    NextLevelName = FName("Lore_Fase3");
 }
 
 void AGameMode_Level6::BeginPlay()
@@ -25,7 +28,7 @@ void AGameMode_Level6::BeginPlay()
 void AGameMode_Level6::SpawnDestroyer()
 {
     if (!EnemyClass) return;
-    if (EnemiesDefeated >= EnemiesToDefeat) return;
+    if (EnemiesDefeated >= EnemiesRequired) return;
 
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
@@ -40,7 +43,7 @@ void AGameMode_Level6::SpawnDestroyer()
     GetWorld()->SpawnActor<ADestroyerEnemy>(
         EnemyClass, SpawnLocation, SpawnRotation);
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
     OnDestroyerCountChanged.Broadcast(Remaining);
 
     if (GEngine)
@@ -56,17 +59,17 @@ void AGameMode_Level6::OnEnemyDefeated()
 {
     EnemiesDefeated++;
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
     OnDestroyerCountChanged.Broadcast(Remaining);
 
     if (GEngine)
     {
         GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
             FString::Printf(TEXT("Destroyer destruido! Faltan: %d/%d"),
-                Remaining, EnemiesToDefeat));
+                Remaining, EnemiesRequired));
     }
 
-    if (EnemiesDefeated >= EnemiesToDefeat)
+    if (EnemiesDefeated >= EnemiesRequired)
     {
         if (GEngine)
         {
@@ -75,5 +78,7 @@ void AGameMode_Level6::OnEnemyDefeated()
         }
         UE_LOG(LogTemp, Warning, TEXT("NIVEL 6 COMPLETADO!"));
         GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+        LoadNextLevel(); 
     }
 }

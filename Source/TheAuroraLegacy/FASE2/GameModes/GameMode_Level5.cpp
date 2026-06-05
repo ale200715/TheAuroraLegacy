@@ -6,6 +6,9 @@
 AGameMode_Level5::AGameMode_Level5()
 {
     PrimaryActorTick.bCanEverTick = false;
+
+    EnemiesRequired = 8;
+    NextLevelName = FName("Level6");
 }
 
 void AGameMode_Level5::BeginPlay()
@@ -25,7 +28,7 @@ void AGameMode_Level5::BeginPlay()
 void AGameMode_Level5::SpawnTank()
 {
     if (!EnemyClass) return;
-    if (EnemiesDefeated >= EnemiesToDefeat) return;
+    if (EnemiesDefeated >= EnemiesRequired) return;
 
     APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
@@ -42,7 +45,7 @@ void AGameMode_Level5::SpawnTank()
 
     OnTankGroupSpawned.Broadcast(1);
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
     OnTankCountChanged.Broadcast(Remaining);
 
     if (GEngine)
@@ -58,17 +61,17 @@ void AGameMode_Level5::OnEnemyDefeated()
 {
     EnemiesDefeated++;
 
-    int32 Remaining = EnemiesToDefeat - EnemiesDefeated;
+    int32 Remaining = EnemiesRequired - EnemiesDefeated;
     OnTankCountChanged.Broadcast(Remaining);
 
     if (GEngine)
     {
         GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
             FString::Printf(TEXT("Tank destruido! Faltan: %d/%d"),
-                Remaining, EnemiesToDefeat));
+                Remaining, EnemiesRequired));
     }
 
-    if (EnemiesDefeated >= EnemiesToDefeat)
+    if (EnemiesDefeated >= EnemiesRequired)
     {
         if (GEngine)
         {
@@ -77,6 +80,8 @@ void AGameMode_Level5::OnEnemyDefeated()
         }
         UE_LOG(LogTemp, Warning, TEXT("NIVEL 5 COMPLETADO!"));
         GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+
+        LoadNextLevel();
     }
 }
 
