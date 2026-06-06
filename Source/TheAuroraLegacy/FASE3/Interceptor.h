@@ -23,6 +23,8 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void MoveEnemy(float DeltaTime) override;
+    virtual void NotifyActorBeginOverlap(
+        AActor* OtherActor) override;
 
 private:
     FVector MoveDirection;

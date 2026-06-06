@@ -2,7 +2,6 @@
 
 
 #include "GameMode_Level1.h"
-
 #include "../Pool/Phase1EnemyPool.h"
 #include "../Enemies/EnemyDrone.h"
 #include "../Core/GameFacade.h"
@@ -28,22 +27,6 @@ void AGameMode_Level1::BeginPlay()
         Level1Pool->InitializePool();
     }
 
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
-        {
-            Facade->RegisterEnemyClass(
-                EEnemyType::Drone,
-                AEnemyDrone::StaticClass());
-
-            UE_LOG(LogTemp, Warning, TEXT("Level1: Drone registrado en el Facade"));
-        }
-    }
-
     Super::BeginPlay();
 
     UE_LOG(LogTemp, Warning,TEXT("Level1: Iniciado. Derrotar %d drones para pasar"), EnemiesRequired);
@@ -56,7 +39,7 @@ void AGameMode_Level1::SpawnEnemy()
         GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
         return;
     }
-
+    
     if (TotalSpawned - EnemiesDefeated >= MaxActiveAtOnce)
     {
         return;
@@ -67,14 +50,7 @@ void AGameMode_Level1::SpawnEnemy()
         FindPool();
         if (!Level1Pool) return;
     }
-
     AEnemyBase* Drone = Level1Pool->GetEnemyFromPool();
-
-    if (!Drone)
-    {
-        UE_LOG(LogTemp, Warning,TEXT("Level1: Pool sin drones disponibles"));
-        return;
-    }
 
     APawn* Player =  UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 
@@ -94,10 +70,15 @@ void AGameMode_Level1::SpawnEnemy()
     Drone->SetActorTickEnabled(true);
     Drone->Health = 1; 
 
+    AEnemyDrone* DroneCast =Cast<AEnemyDrone>(Drone);
+    if (DroneCast)
+    {
+        DroneCast->RestartFireTimer();
+    }
+
     TotalSpawned++;
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Level1: Drone %d spawneado. Derrotados: %d/%d"), TotalSpawned,EnemiesDefeated, EnemiesRequired);
+    UE_LOG(LogTemp, Warning,TEXT("Level1: Drone %d spawneado. Derrotados: %d/%d"), TotalSpawned,EnemiesDefeated, EnemiesRequired);
 }
 
 void AGameMode_Level1::FindPool()
@@ -106,12 +87,4 @@ void AGameMode_Level1::FindPool()
 
     Level1Pool = Cast<APhase1EnemyPool>(FoundActor);
 
-    if (Level1Pool)
-    {
-        UE_LOG(LogTemp, Warning,TEXT("Level1: Pool encontrado"));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Level1: No se encontro el Pool en el nivel"));
-    }
 }

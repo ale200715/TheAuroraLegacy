@@ -23,7 +23,7 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Pool Settings")
     int32 PoolSize = 10;
-
+    int32 PoolSizeP = 20;
     TArray<class AEnemyBase*> EnemyPool;
 
     class AEnemyBase* GetEnemyFromPool();
@@ -35,13 +35,10 @@ public:
 
     class AEnemyProjectile* GetProjectileFromPool();
 public:
-    void ReinitializePool(
-        TSubclassOf<AEnemyBase> NewEnemyClass);
-    void SetEnemyClassBeforeInit(
-        TSubclassOf<AEnemyBase> NewClass)
+
+    void SetEnemyClassBeforeInit(TSubclassOf<AEnemyBase> NewClass)
     {
         EnemyClass = NewClass;
     }
-public:
     void InitializePool();
 };

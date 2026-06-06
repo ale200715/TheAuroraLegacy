@@ -19,7 +19,6 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     class UStaticMeshComponent* EnemyMesh;
 
-    // Función pública para reiniciar timer
     void RestartFireTimer();
 
     
@@ -34,16 +33,13 @@ protected:
     float FireRate = 4.f;
 
 private:
-    // ---- MOVIMIENTO HORIZONTAL ----
     float MoveDirection = 1.f;
     float HorizontalLimit = 700.f;
 
-    // ---- RALENTIZACION ----
-    float SlowRadius = 400.f;
+    float SlowRadius = 500.f;
     bool bIsSlowingPlayer = false;
     float OriginalPlayerSpeed = 0.f;
 
-    // ---- DISPARO ----
     void FireProjectile();
     void CheckSlowRadius();
 

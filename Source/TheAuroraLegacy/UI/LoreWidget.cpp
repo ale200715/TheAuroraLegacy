@@ -9,8 +9,7 @@ void ULoreWidget::NativeConstruct()
 
     if (ContinueButton)
     {
-        ContinueButton->OnClicked.AddDynamic(
-            this, &ULoreWidget::OnContinueClicked);
+        ContinueButton->OnClicked.AddDynamic(this, &ULoreWidget::OnContinueClicked);
     }
 
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
@@ -21,23 +20,19 @@ void ULoreWidget::NativeConstruct()
     }
 }
 
-void ULoreWidget::SetupLore(
-    FString Text,
-    FName NextLevelName)
+void ULoreWidget::SetupLore(FString Text,FName NextLevelName)
 {
     NextLevel = NextLevelName;
 
     if (LoreText)
     {
-        LoreText->SetText(
-            FText::FromString(Text));
+        LoreText->SetText( FText::FromString(Text));
     }
 }
 
 void ULoreWidget::OnContinueClicked()
 {
-    APlayerController* PC =
-        GetWorld()->GetFirstPlayerController();
+    APlayerController* PC =GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(false);
@@ -46,7 +41,6 @@ void ULoreWidget::OnContinueClicked()
 
     if (NextLevel != NAME_None)
     {
-        UGameplayStatics::OpenLevel(
-            this, NextLevel);
+        UGameplayStatics::OpenLevel(this, NextLevel);
     }
 }

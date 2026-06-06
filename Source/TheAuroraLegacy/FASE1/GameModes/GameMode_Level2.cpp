@@ -21,23 +21,9 @@ void AGameMode_Level2::BeginPlay()
 
     if (Level2Pool)
     {
-        Level2Pool->EnemyClass = AEnemyHunter::StaticClass(); Level2Pool->InitializePool();
+        Level2Pool->EnemyClass = AEnemyHunter::StaticClass(); 
+        Level2Pool->InitializePool();
     }
-
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass( GetWorld(), AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
-        {
-            Facade->RegisterEnemyClass( EEnemyType::Hunter, AEnemyHunter::StaticClass());
-
-            UE_LOG(LogTemp, Warning,TEXT("Level2: Hunter registrado en el Facade"));
-        }
-    }
-
     Super::BeginPlay();
 
     UE_LOG(LogTemp, Warning, TEXT("Level2: Iniciado. Derrotar %d hunters para pasar"), EnemiesRequired);
@@ -63,11 +49,6 @@ void AGameMode_Level2::SpawnEnemy()
 
     AEnemyBase* Hunter =Level2Pool->GetEnemyFromPool();
 
-    if (!Hunter)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Level2: Pool sin hunters"));
-        return;
-    }
 
     APawn* Player = UGameplayStatics::GetPlayerPawn( GetWorld(), 0);
 
@@ -104,12 +85,4 @@ void AGameMode_Level2::FindPool()
 
     Level2Pool = Cast<APhase1EnemyPool>(FoundActor);
 
-    if (Level2Pool) {
-
-        UE_LOG(LogTemp, Warning,TEXT("Level2: Pool encontrado"));
-    }
-    else {
-
-        UE_LOG(LogTemp, Error,TEXT("Level2: No se encontro el Pool"));
-    }
 }

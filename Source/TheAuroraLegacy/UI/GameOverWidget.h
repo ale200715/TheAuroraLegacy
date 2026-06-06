@@ -4,8 +4,7 @@
 #include "GameOverWidget.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API UGameOverWidget
-    : public UUserWidget
+class THEAURORALEGACY_API UGameOverWidget : public UUserWidget
 {
     GENERATED_BODY()
 

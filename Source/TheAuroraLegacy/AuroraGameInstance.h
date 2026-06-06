@@ -9,7 +9,7 @@ class THEAURORALEGACY_API UAuroraGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    // Puntuación
+    // Puntuaciï¿½n
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 Score = 0;
 

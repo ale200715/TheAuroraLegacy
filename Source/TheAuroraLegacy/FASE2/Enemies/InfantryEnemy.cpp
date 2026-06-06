@@ -2,6 +2,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "../GameModes/GameMode_Level4.h"
 #include "../Projectiles/Phase2EnemyProjectile.h"
+#include "../../TheAuroraLegacyGameMode.h"
 #include "../AuroraGameInstance.h"
 
 AInfantryEnemy::AInfantryEnemy()
@@ -86,11 +87,11 @@ void AInfantryEnemy::NotifyDeath()
     }
 
     // Observer: notificar al GameMode
-    AGameMode_Level4* GM = Cast<AGameMode_Level4>(
+    ATheAuroraLegacyGameMode* GM = Cast<ATheAuroraLegacyGameMode>(
         GetWorld()->GetAuthGameMode());
     if (GM)
     {
-        GM->OnEnemyDefeated();
+        GM->OnEnemyDefeated(100);
         UE_LOG(LogTemp, Warning, TEXT("GameMode notificado!"));
     }
     else

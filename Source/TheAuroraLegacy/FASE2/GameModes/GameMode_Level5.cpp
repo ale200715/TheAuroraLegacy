@@ -2,30 +2,18 @@
 #include "../Enemies/TankEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "../Core/GameFacade.h"
+#include "../../Enemies/EnemyBase.h" 
 
 AGameMode_Level5::AGameMode_Level5()
 {
     PrimaryActorTick.bCanEverTick = false;
-
     EnemiesRequired = 8;
     NextLevelName = FName("Level6");
+    PhaseNumber = 2;
 }
 
-void AGameMode_Level5::BeginPlay()
-{
-    Super::BeginPlay();
-
-    GetWorldTimerManager().SetTimer(
-        SpawnTimerHandle,
-        this,
-        &AGameMode_Level5::SpawnTank,
-        6.f,
-        true,
-        2.f
-    );
-}
-
-void AGameMode_Level5::SpawnTank()
+void AGameMode_Level5::SpawnEnemy()
 {
     if (!EnemyClass) return;
     if (EnemiesDefeated >= EnemiesRequired) return;
@@ -36,52 +24,13 @@ void AGameMode_Level5::SpawnTank()
     FVector SpawnLocation = Player->GetActorLocation() +
         Player->GetActorForwardVector() * 2000.f;
     SpawnLocation.Z = Player->GetActorLocation().Z;
-
     FRotator SpawnRotation = Player->GetActorRotation();
     SpawnRotation.Yaw += 180.f;
 
-    GetWorld()->SpawnActor<ATankEnemy>(
+    ATankEnemy* Enemy = GetWorld()->SpawnActor<ATankEnemy>(
         EnemyClass, SpawnLocation, SpawnRotation);
 
-    OnTankGroupSpawned.Broadcast(1);
-
-    int32 Remaining = EnemiesRequired - EnemiesDefeated;
-    OnTankCountChanged.Broadcast(Remaining);
-
-    if (GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Orange,
-            FString::Printf(TEXT("¡Tank spawneado! Faltan derrotar: %d"), Remaining));
-    }
-
-    UE_LOG(LogTemp, Warning, TEXT("Tank spawneado!"));
-}
-
-void AGameMode_Level5::OnEnemyDefeated()
-{
-    EnemiesDefeated++;
-
-    int32 Remaining = EnemiesRequired - EnemiesDefeated;
-    OnTankCountChanged.Broadcast(Remaining);
-
-    if (GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Green,
-            FString::Printf(TEXT("Tank destruido! Faltan: %d/%d"),
-                Remaining, EnemiesRequired));
-    }
-
-    if (EnemiesDefeated >= EnemiesRequired)
-    {
-        if (GEngine)
-        {
-            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow,
-                TEXT("¡NIVEL 5 COMPLETADO!"));
-        }
-        UE_LOG(LogTemp, Warning, TEXT("NIVEL 5 COMPLETADO!"));
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-
-        LoadNextLevel();
-    }
+    if (Enemy && GameFacadeInstance)
+        GameFacadeInstance->ConfigureEnemy(Enemy, EEnemyType::Armored);
 }
 

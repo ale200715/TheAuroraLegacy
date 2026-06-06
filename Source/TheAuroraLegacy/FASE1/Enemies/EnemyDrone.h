@@ -4,8 +4,7 @@
 #include "EnemyDrone.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AEnemyDrone
-    : public AEnemyBase
+class THEAURORALEGACY_API AEnemyDrone: public AEnemyBase
 {
     GENERATED_BODY()
 
@@ -15,6 +14,7 @@ public:
 
     UPROPERTY(VisibleAnywhere, Category = "Components")
     class UStaticMeshComponent* EnemyMesh;
+    void RestartFireTimer();
 
 protected:
     virtual void BeginPlay() override;
@@ -25,8 +25,9 @@ protected:
     float FireRate = 2.0f;
 
 private:
+    TWeakObjectPtr<APawn> CachedPlayer;
     FVector MoveDirection;
     void FireProjectile();
-    TWeakObjectPtr<APawn> CachedPlayer;
     void CachePlayer();
+    void FindPool();
 };

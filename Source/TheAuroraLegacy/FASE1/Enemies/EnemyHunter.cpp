@@ -15,20 +15,15 @@ AEnemyHunter::AEnemyHunter()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    EnemyMesh = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("HunterMesh"));
+    EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("HunterMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder
-        <UStaticMesh> HunterMeshAsset(
-            TEXT("/Engine/BasicShapes/Cone.Cone"));
+    static ConstructorHelpers::FObjectFinder <UStaticMesh> HunterMeshAsset( TEXT("/Engine/BasicShapes/Cone.Cone"));
 
     if (HunterMeshAsset.Succeeded())
     {
-        EnemyMesh->SetStaticMesh(
-            HunterMeshAsset.Object);
-        EnemyMesh->SetWorldScale3D(
-            FVector(0.5f, 0.5f, 0.5f));
+        EnemyMesh->SetStaticMesh( HunterMeshAsset.Object);
+        EnemyMesh->SetWorldScale3D( FVector(0.5f, 0.5f, 0.5f));
     }
 
     EnemyMesh->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics);
@@ -76,16 +71,6 @@ void AEnemyHunter::MoveEnemy(float DeltaTime)
     SetActorLocation(NewLocation);
     SetActorRotation(Direction.Rotation());
 
-    if (Distance > 5000.f)
-    {
-        SetActorHiddenInGame(true);
-        SetActorTickEnabled(false);
-        SetActorEnableCollision(false);
-        GetWorldTimerManager().ClearTimer(
-            FireTimerHandle);
-        GetWorldTimerManager().ClearTimer(
-            BurstTimerHandle);
-    }
 }
 
 
@@ -93,20 +78,14 @@ void AEnemyHunter::StartBurst()
 {
     BurstCount = 0;
 
-    GetWorldTimerManager().SetTimer(
-        BurstTimerHandle,
-        this,
-        &AEnemyHunter::FireBurst,
-        0.2f,
-        true);
+    GetWorldTimerManager().SetTimer( BurstTimerHandle, this, &AEnemyHunter::FireBurst, 0.2f,true);
 }
 
 void AEnemyHunter::FireBurst()
 {
     if (BurstCount >= BurstMax)
     {
-        GetWorldTimerManager().ClearTimer(
-            BurstTimerHandle);
+        GetWorldTimerManager().ClearTimer( BurstTimerHandle);
         return;
     }
 
@@ -118,24 +97,19 @@ void AEnemyHunter::FireBurst()
         return;
     }
 
-    AEnemyProjectile* Bullet =
-        LevelPool->GetProjectileFromPool();
+    AEnemyProjectile* Bullet = LevelPool->GetProjectileFromPool();
 
     if (!Bullet) return;
 
-    // Disparar hacia el jugador
     FRotator ShootRotation = GetActorRotation();
     if (CachedPlayer.IsValid())
     {
-        FVector Direction =
-            CachedPlayer->GetActorLocation() -
-            GetActorLocation();
+        FVector Direction =CachedPlayer->GetActorLocation() - GetActorLocation();
         Direction.Normalize();
         ShootRotation = Direction.Rotation();
     }
 
-    FVector SpawnLocation = GetActorLocation() +
-        GetActorForwardVector() * 100.f;
+    FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 100.f;
 
     Bullet->SetActorLocation(SpawnLocation);
     Bullet->SetActorRotation(ShootRotation);
@@ -143,102 +117,62 @@ void AEnemyHunter::FireBurst()
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
 
-    // Auto desactivar después de 3 segundos
     FTimerHandle DeactivateTimer;
     FTimerDelegate DeactivateDelegate;
-    DeactivateDelegate.BindUObject(
-        Bullet,
-        &AEnemyProjectile::DeactivateSelf);
+    DeactivateDelegate.BindUObject( Bullet, &AEnemyProjectile::DeactivateSelf);
 
-    GetWorldTimerManager().SetTimer(
-        DeactivateTimer,
-        DeactivateDelegate,
-        3.f,
-        false);
+    GetWorldTimerManager().SetTimer(DeactivateTimer,DeactivateDelegate, 3.f,false);
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Hunter: Disparo %d de %d"),
-        BurstCount, BurstMax);
 }
 
 void AEnemyHunter::OnDeath()
 {
-    UE_LOG(LogTemp, Warning,
-        TEXT("Hunter muerto - regresando al pool"));
+    UE_LOG(LogTemp, Warning,TEXT("Hunter muerto - regresando al pool"));
 
-    // Notificar al Facade
     TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(
-        GetWorld(),
-        AGameFacade::StaticClass(),
-        FoundFacades);
+    UGameplayStatics::GetAllActorsOfClass( GetWorld(), AGameFacade::StaticClass(),FoundFacades);
 
     if (FoundFacades.Num() > 0)
     {
-        AGameFacade* Facade =
-            Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
+        AGameFacade* Facade =Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade) {
             Facade->NotifyEnemyDefeated(this);
+        }
     }
 
-    // Notificar al GameMode
-    ATheAuroraLegacyGameMode* GM =
-        Cast<ATheAuroraLegacyGameMode>(
-            GetWorld()->GetAuthGameMode());
-    if (GM)
-        GM->OnEnemyDefeated(ScoreValue);
-
-    // Desactivar en lugar de destruir
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);
     SetActorLocation(FVector::ZeroVector);
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
-    GetWorldTimerManager().ClearTimer(
-        BurstTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
+    GetWorldTimerManager().ClearTimer( BurstTimerHandle);
 
-    // Restaurar vida para reutilización
     Health = 2;
 }
 
 void AEnemyHunter::CachePlayer()
 {
-    APawn* Player =
-        UGameplayStatics::GetPlayerPawn(
-            GetWorld(), 0);
-    if (Player)
+    APawn* Player =UGameplayStatics::GetPlayerPawn( GetWorld(), 0);
+    if (Player) {
         CachedPlayer = Player;
+    }
 }
 
 void AEnemyHunter::FindPool()
 {
-    AActor* FoundActor =
-        UGameplayStatics::GetActorOfClass(
-            GetWorld(),
-            APhase1EnemyPool::StaticClass());
+    AActor* FoundActor =UGameplayStatics::GetActorOfClass( GetWorld(),APhase1EnemyPool::StaticClass());
 
     LevelPool = Cast<APhase1EnemyPool>(FoundActor);
 }
 
 void AEnemyHunter::RestartFireTimer()
 {
-    // Limpiar timers anteriores
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
-    GetWorldTimerManager().ClearTimer(
-        BurstTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(BurstTimerHandle);
 
     BurstCount = 0;
 
-    // Reiniciar disparo
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemyHunter::StartBurst,
-        FireRate,
-        true);
+    GetWorldTimerManager().SetTimer(FireTimerHandle, this, &AEnemyHunter::StartBurst,FireRate, true);
 
-    UE_LOG(LogTemp, Warning,
-        TEXT("Hunter: Timer de disparo reiniciado"));
+    UE_LOG(LogTemp, Warning,TEXT("Hunter: Timer de disparo reiniciado"));
 }

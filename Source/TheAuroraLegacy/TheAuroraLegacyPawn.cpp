@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "TheAuroraLegacyGameMode.h"
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 #include "TimerManager.h"
@@ -21,30 +22,25 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
     };
     static FConstructorStatics ConstructorStatics;
 
-    PlaneMesh = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("PlaneMesh0"));
-    PlaneMesh->SetStaticMesh(
-        ConstructorStatics.PlaneMesh.Get());
+    PlaneMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("PlaneMesh0"));
+    PlaneMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());
     RootComponent = PlaneMesh;
 
-    SpringArm = CreateDefaultSubobject
-        <USpringArmComponent>(TEXT("SpringArm0"));
+    SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
     SpringArm->SetupAttachment(RootComponent);
     SpringArm->TargetArmLength = 160.0f;
     SpringArm->SocketOffset = FVector(0.f, 0.f, 60.f);
     SpringArm->bEnableCameraLag = false;
     SpringArm->CameraLagSpeed = 15.f;
 
-    Camera = CreateDefaultSubobject
-        <UCameraComponent>(TEXT("Camera0"));
-    Camera->SetupAttachment(SpringArm,
-        USpringArmComponent::SocketName);
+    Camera = CreateDefaultSubobject <UCameraComponent>(TEXT("Camera0"));
+    Camera->SetupAttachment(SpringArm,USpringArmComponent::SocketName);
     Camera->bUsePawnControlRotation = false;
 
     Acceleration = 500.f;
     TurnSpeed = 50.f;
     MaxSpeed = 4000.f;
-    MinSpeed = 0.f;
+    //MinSpeed = 0.f;
     CurrentForwardSpeed = 0.f;
 
     Lives = 3;
@@ -89,8 +85,7 @@ void ATheAuroraLegacyPawn::NotifyHit(
     SetActorRotation(FQuat::Slerp(CurrentRotation.Quaternion(), HitNormal.ToOrientationQuat(), 0.025f));
 }
 
-void ATheAuroraLegacyPawn::SetupPlayerInputComponent(
-    class UInputComponent* PlayerInputComponent)
+void ATheAuroraLegacyPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
     check(PlayerInputComponent);
 
@@ -132,27 +127,11 @@ void ATheAuroraLegacyPawn::MoveRightInput(float Val)
 
     const bool bIsTurning = FMath::Abs(Val) > 0.2f;
     float TargetRollSpeed = bIsTurning ? (CurrentYawSpeed * 0.5f) :  (GetActorRotation().Roll * -2.f);
-    CurrentRollSpeed = FMath::FInterpTo(
-        CurrentRollSpeed, TargetRollSpeed,
-        GetWorld()->GetDeltaSeconds(), 2.f);
+    CurrentRollSpeed = FMath::FInterpTo( CurrentRollSpeed, TargetRollSpeed,GetWorld()->GetDeltaSeconds(), 2.f);
 }
 
 void ATheAuroraLegacyPawn::Fire()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Fire llamado!"));
-
-    if (!ProjectileClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("ProjectileClass es NULL!"));
-        return;
-    }
-
-    if (!bCanFire)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No puede disparar aun"));
-        return;
-    }
-
     FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 150.f;
     FRotator SpawnRotation = GetActorRotation();
 
@@ -165,11 +144,19 @@ void ATheAuroraLegacyPawn::Fire()
 void ATheAuroraLegacyPawn::TakeDamage_Ship( int32 DamageAmount)
 {
     Lives -= DamageAmount;
-
     if (Lives <= 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Game Over - Sin vidas"));
         Destroy();
+        if (UWorld* World = GetWorld())
+        {
+            ATheAuroraLegacyGameMode* GameMode = Cast<ATheAuroraLegacyGameMode>(World->GetAuthGameMode());
+
+            if (GameMode)
+            {
+                GameMode->OnPlayerDeath();
+            }
+        }
     }
     else
     {

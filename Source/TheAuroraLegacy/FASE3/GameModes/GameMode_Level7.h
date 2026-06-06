@@ -7,8 +7,7 @@
 #include "GameMode_Level7.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AGameMode_Level7
-    : public ATheAuroraLegacyGameMode
+class THEAURORALEGACY_API AGameMode_Level7 : public ATheAuroraLegacyGameMode
 {
     GENERATED_BODY()
 

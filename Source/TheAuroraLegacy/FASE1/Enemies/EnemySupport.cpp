@@ -16,26 +16,19 @@ AEnemySupport::AEnemySupport()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    EnemyMesh = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("SupportMesh"));
+    EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("SupportMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder
-        <UStaticMesh> SupportMeshAsset(
-            TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> SupportMeshAsset( TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 
     if (SupportMeshAsset.Succeeded())
     {
-        EnemyMesh->SetStaticMesh(
-            SupportMeshAsset.Object);
-        EnemyMesh->SetWorldScale3D(
-            FVector(0.6f, 0.6f, 0.6f));
+        EnemyMesh->SetStaticMesh(SupportMeshAsset.Object);
+        EnemyMesh->SetWorldScale3D( FVector(0.6f, 0.6f, 0.6f));
     }
 
-    EnemyMesh->SetCollisionEnabled(
-        ECollisionEnabled::QueryAndPhysics);
-    EnemyMesh->SetCollisionProfileName(
-        TEXT("BlockAll"));
+    EnemyMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    EnemyMesh->SetCollisionProfileName(TEXT("BlockAll"));
 
     Health = 2;
     MoveSpeed = 250.f;
@@ -50,12 +43,7 @@ void AEnemySupport::BeginPlay()
     CachePlayer();
     FindPool();
 
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemySupport::FireProjectile,
-        FireRate,
-        true);
+    GetWorldTimerManager().SetTimer(FireTimerHandle,this, &AEnemySupport::FireProjectile,FireRate, true);
 }
 
 void AEnemySupport::Tick(float DeltaTime)
@@ -66,9 +54,17 @@ void AEnemySupport::Tick(float DeltaTime)
 
 void AEnemySupport::MoveEnemy(float DeltaTime)
 {
+    if (bIsSlowingPlayer && CachedPlayer.IsValid())
+    {
+        ATheAuroraLegacyPawn* PlayerPawn =Cast<ATheAuroraLegacyPawn>(CachedPlayer.Get());
+        if (PlayerPawn && OriginalPlayerSpeed > 0.f) { 
+            PlayerPawn->SetMaxSpeed(OriginalPlayerSpeed); 
+        }
+        bIsSlowingPlayer = false;
+    }
+
     FVector NewLocation = GetActorLocation();
-    NewLocation.Y += MoveDirection *
-        MoveSpeed * DeltaTime;
+    NewLocation.Y += MoveDirection *MoveSpeed * DeltaTime;
 
     if (NewLocation.Y > HorizontalLimit)
         MoveDirection = -1.f;
@@ -86,9 +82,7 @@ void AEnemySupport::CheckSlowRadius()
         return;
     }
 
-    float Distance = FVector::Dist(
-        GetActorLocation(),
-        CachedPlayer->GetActorLocation());
+    float Distance = FVector::Dist( GetActorLocation(), CachedPlayer->GetActorLocation());
 
     ATheAuroraLegacyPawn* PlayerPawn =
         Cast<ATheAuroraLegacyPawn>(
@@ -98,25 +92,18 @@ void AEnemySupport::CheckSlowRadius()
 
     if (Distance <= SlowRadius && !bIsSlowingPlayer)
     {
-        // Usar getter en lugar de acceso directo
-        OriginalPlayerSpeed =
-            PlayerPawn->GetMaxSpeed();
+        OriginalPlayerSpeed = PlayerPawn->GetMaxSpeed();
         bIsSlowingPlayer = true;
-        PlayerPawn->SetMaxSpeed(
-            PlayerPawn->GetMaxSpeed() * 0.5f);
+        PlayerPawn->SetMaxSpeed( OriginalPlayerSpeed * 0.5f);
 
-        UE_LOG(LogTemp, Warning,
-            TEXT("Support: Jugador ralentizado"));
+        UE_LOG(LogTemp, Warning,TEXT("Support: Jugador ralentizado"));
     }
-    else if (Distance > SlowRadius &&
-        bIsSlowingPlayer)
+    else if (Distance > SlowRadius && bIsSlowingPlayer)
     {
         bIsSlowingPlayer = false;
-        // Restaurar velocidad original
         PlayerPawn->SetMaxSpeed(OriginalPlayerSpeed);
 
-        UE_LOG(LogTemp, Warning,
-            TEXT("Support: Velocidad restaurada"));
+        UE_LOG(LogTemp, Warning, TEXT("Support: Velocidad restaurada"));
     }
 }
 
@@ -128,23 +115,19 @@ void AEnemySupport::FireProjectile()
         return;
     }
 
-    AEnemyProjectile* Bullet =
-        LevelPool->GetProjectileFromPool();
+    AEnemyProjectile* Bullet = LevelPool->GetProjectileFromPool();
 
     if (!Bullet) return;
 
     FRotator ShootRotation = GetActorRotation();
     if (CachedPlayer.IsValid())
     {
-        FVector Direction =
-            CachedPlayer->GetActorLocation() -
-            GetActorLocation();
+        FVector Direction =CachedPlayer->GetActorLocation() - GetActorLocation();
         Direction.Normalize();
         ShootRotation = Direction.Rotation();
     }
 
-    FVector SpawnLocation = GetActorLocation() +
-        FVector(0.f, 0.f, -50.f);
+    FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -50.f);
 
     Bullet->SetActorLocation(SpawnLocation);
     Bullet->SetActorRotation(ShootRotation);
@@ -155,96 +138,68 @@ void AEnemySupport::FireProjectile()
 
     FTimerHandle DeactivateTimer;
     FTimerDelegate DeactivateDelegate;
-    DeactivateDelegate.BindUObject(
-        Bullet,
-        &AEnemyProjectile::DeactivateSelf);
+    DeactivateDelegate.BindUObject( Bullet, &AEnemyProjectile::DeactivateSelf);
 
-    GetWorldTimerManager().SetTimer(
-        DeactivateTimer,
-        DeactivateDelegate,
-        5.f,
-        false);
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("Support: Proyectil disparado"));
+    GetWorldTimerManager().SetTimer( DeactivateTimer,DeactivateDelegate, 5.f,false);
 }
 
 void AEnemySupport::OnDeath()
 {
-    UE_LOG(LogTemp, Warning,
-        TEXT("Support muerto - regresando al pool"));
+    UE_LOG(LogTemp, Warning,TEXT("Support muerto - regresando al pool"));
 
     if (bIsSlowingPlayer && CachedPlayer.IsValid())
     {
-        ATheAuroraLegacyPawn* PlayerPawn =
-            Cast<ATheAuroraLegacyPawn>(
-                CachedPlayer.Get());
-        if (PlayerPawn)
-            // Restaurar velocidad original
+        ATheAuroraLegacyPawn* PlayerPawn =Cast<ATheAuroraLegacyPawn>(CachedPlayer.Get());
+        if (PlayerPawn) {
             PlayerPawn->SetMaxSpeed(
                 OriginalPlayerSpeed);
+        }
+
     }
 
     bIsSlowingPlayer = false;
 
+    OriginalPlayerSpeed = 0.f;
+
     TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(
-        GetWorld(),
-        AGameFacade::StaticClass(),
-        FoundFacades);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(),AGameFacade::StaticClass(), FoundFacades);
 
     if (FoundFacades.Num() > 0)
     {
-        AGameFacade* Facade =
-            Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade)
+        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade) {
             Facade->NotifyEnemyDefeated(this);
+        }
+            
     }
-
-    ATheAuroraLegacyGameMode* GM =
-        Cast<ATheAuroraLegacyGameMode>(
-            GetWorld()->GetAuthGameMode());
-    if (GM)
-        GM->OnEnemyDefeated(ScoreValue);
 
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);
     SetActorLocation(FVector::ZeroVector);
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
     Health = 2;
 }
 
 void AEnemySupport::RestartFireTimer()
 {
-    GetWorldTimerManager().ClearTimer(
-        FireTimerHandle);
+    GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
-    GetWorldTimerManager().SetTimer(
-        FireTimerHandle,
-        this,
-        &AEnemySupport::FireProjectile,
-        FireRate,
-        true);
+    GetWorldTimerManager().SetTimer( FireTimerHandle, this, &AEnemySupport::FireProjectile, FireRate, true);
 }
 
 void AEnemySupport::CachePlayer()
 {
-    APawn* Player =
-        UGameplayStatics::GetPlayerPawn(
-            GetWorld(), 0);
-    if (Player)
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    if (Player) {
         CachedPlayer = Player;
+    }
 }
 
 void AEnemySupport::FindPool()
 {
-    AActor* FoundActor =
-        UGameplayStatics::GetActorOfClass(
-            GetWorld(),
-            APhase1EnemyPool::StaticClass());
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(),APhase1EnemyPool::StaticClass());
 
     LevelPool = Cast<APhase1EnemyPool>(FoundActor);
 }
