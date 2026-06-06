@@ -1,90 +1,61 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GameMode_Level1.h"
 #include "../Pool/Phase1EnemyPool.h"
 #include "../Enemies/EnemyDrone.h"
-#include "../Core/GameFacade.h"
+#include "../../Core/GameFacade.h"
 #include "Kismet/GameplayStatics.h"
 
 AGameMode_Level1::AGameMode_Level1()
 {
-   EnemiesRequired = 15;
+    EnemiesRequired = 15;
     SpawnInterval = 3.f;
     SpawnDistance = 800.f;
-
+    PhaseNumber = 1;
     NextLevelName = FName("Level2_Hunter");
 }
 
-
 void AGameMode_Level1::BeginPlay()
 {
-    FindPool();
+    AActor* Found = UGameplayStatics::GetActorOfClass(GetWorld(), APhase1EnemyPool::StaticClass());
+    LevelPool = Cast<APhase1EnemyPool>(Found);
 
-    if (Level1Pool)
+    if (LevelPool)
     {
-        Level1Pool->EnemyClass = AEnemyDrone::StaticClass();
-        Level1Pool->InitializePool();
+        LevelPool->EnemyClass = AEnemyDrone::StaticClass();
+        LevelPool->InitializePool();
     }
 
-    Super::BeginPlay();
-
-    UE_LOG(LogTemp, Warning,TEXT("Level1: Iniciado. Derrotar %d drones para pasar"), EnemiesRequired);
+    Super::BeginPlay(); // busca el Facade e inicia el timer de spawn
 }
 
 void AGameMode_Level1::SpawnEnemy()
 {
-    if (EnemiesDefeated >= EnemiesRequired)
-    {
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-        return;
-    }
-    
-    if (TotalSpawned - EnemiesDefeated >= MaxActiveAtOnce)
-    {
-        return;
-    }
+    if (!LevelPool) return;
 
-    if (!Level1Pool)
-    {
-        FindPool();
-        if (!Level1Pool) return;
-    }
-    AEnemyBase* Drone = Level1Pool->GetEnemyFromPool();
+    // Respetar el límite de activos simultáneos
+    int32 ActiveCount = (TotalSpawned - EnemiesDefeated);
+    if (ActiveCount >= MaxActiveAtOnce) return;
 
-    APawn* Player =  UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    AEnemyBase* Enemy = LevelPool->GetEnemyFromPool();
+    if (!Enemy) return;
 
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
 
-    float RandomY = FMath::RandRange( -200.f, 200.f);
-    float RandomZ = FMath::RandRange(0.f, 100.f);
+    FVector SpawnLocation = Player->GetActorLocation() + Player->GetActorForwardVector() * SpawnDistance + FVector(0.f, FMath::RandRange(-200.f, 200.f),FMath::RandRange(0.f, 100.f));
 
-    FVector SpawnLocation = Player->GetActorLocation() + Player->GetActorForwardVector() * SpawnDistance;
+    Enemy->SetActorLocation(SpawnLocation);
+    Enemy->SetActorHiddenInGame(false);
+    Enemy->SetActorEnableCollision(true);
+    Enemy->SetActorTickEnabled(true);
 
-    SpawnLocation.Y += RandomY;
-    SpawnLocation.Z += RandomZ;
+    // El Facade configura los stats — no los seteamos a mano
+    if (GameFacadeInstance)
+        GameFacadeInstance->ConfigureEnemy(Enemy, EEnemyType::Drone);
 
-    Drone->SetActorLocation(SpawnLocation);
-    Drone->SetActorHiddenInGame(false);
-    Drone->SetActorEnableCollision(true);
-    Drone->SetActorTickEnabled(true);
-    Drone->Health = 1; 
-
-    AEnemyDrone* DroneCast =Cast<AEnemyDrone>(Drone);
-    if (DroneCast)
-    {
-        DroneCast->RestartFireTimer();
-    }
+    if (AEnemyDrone* Drone = Cast<AEnemyDrone>(Enemy))
+        Drone->RestartFireTimer();
 
     TotalSpawned++;
-
-    UE_LOG(LogTemp, Warning,TEXT("Level1: Drone %d spawneado. Derrotados: %d/%d"), TotalSpawned,EnemiesDefeated, EnemiesRequired);
-}
-
-void AGameMode_Level1::FindPool()
-{
-    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), APhase1EnemyPool::StaticClass());
-
-    Level1Pool = Cast<APhase1EnemyPool>(FoundActor);
-
 }

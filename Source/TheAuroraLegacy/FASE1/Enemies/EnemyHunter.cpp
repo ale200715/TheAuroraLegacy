@@ -129,16 +129,7 @@ void AEnemyHunter::OnDeath()
 {
     UE_LOG(LogTemp, Warning,TEXT("Hunter muerto - regresando al pool"));
 
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass( GetWorld(), AGameFacade::StaticClass(),FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade =Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade) {
-            Facade->NotifyEnemyDefeated(this);
-        }
-    }
+    Super::OnDeath();
 
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);

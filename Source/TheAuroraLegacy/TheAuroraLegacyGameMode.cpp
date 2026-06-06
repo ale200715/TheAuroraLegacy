@@ -9,27 +9,21 @@
 
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
-    PrimaryActorTick.bCanEverTick = false; // no usamos Tick en el GameMode
+    PrimaryActorTick.bCanEverTick = false; 
     DefaultPawnClass = ATheAuroraLegacyPawn::StaticClass();
 }
 
 void ATheAuroraLegacyGameMode::BeginPlay()
 {
     Super::BeginPlay();
-
-    // Buscar el Facade que debe existir en la escena como Actor
-    AActor* Found = UGameplayStatics::GetActorOfClass(
-        GetWorld(), AGameFacade::StaticClass());
+    AActor* Found = UGameplayStatics::GetActorOfClass(GetWorld(), AGameFacade::StaticClass());
     GameFacadeInstance = Cast<AGameFacade>(Found);
 
     if (!GameFacadeInstance)
     {
-        UE_LOG(LogTemp, Error,
-            TEXT("GameMode: NO se encontró GameFacade en la escena. "
-                "Agrégalo como Actor en el nivel."));
+        UE_LOG(LogTemp, Error,TEXT("GameMode: NO se encontró GameFacade en la escena. Agrégalo como Actor en el nivel."));
     }
 
-    // Arrancar el timer de spawn — los hijos sobreescriben SpawnEnemy()
     GetWorldTimerManager().SetTimer(
         SpawnTimerHandle,
         this,
@@ -51,12 +45,7 @@ void ATheAuroraLegacyGameMode::OnEnemyDefeated(int32 ScoreValue)
 {
     EnemiesDefeated++;
 
-    // NOTA: el score ya fue sumado por el Facade en NotifyEnemyDefeated().
-    // No llamar AddScore() aquí — evita doblar el score.
-
-    UE_LOG(LogTemp, Warning,
-        TEXT("GameMode: %d / %d enemigos derrotados"),
-        EnemiesDefeated, EnemiesRequired);
+    UE_LOG(LogTemp, Warning,TEXT("GameMode: %d / %d enemigos derrotados"),EnemiesDefeated, EnemiesRequired);
 
     CheckLevelComplete();
 }
@@ -72,12 +61,7 @@ void ATheAuroraLegacyGameMode::CheckLevelComplete()
     // Level9 sobreescribe CheckLevelComplete() para llamar ShowGoodEnding().
     // El resto de niveles llega aquí y carga el siguiente nivel.
     FTimerHandle TransitionTimer;
-    GetWorldTimerManager().SetTimer(
-        TransitionTimer,
-        this,
-        &ATheAuroraLegacyGameMode::LoadNextLevel,
-        2.f,
-        false);
+    GetWorldTimerManager().SetTimer( TransitionTimer, this,&ATheAuroraLegacyGameMode::LoadNextLevel, 2.f,false);
 }
 
 void ATheAuroraLegacyGameMode::LoadNextLevel()
@@ -121,10 +105,7 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
         CurrentLevel = GI->CurrentLevel;
 
-    Widget->SetupGameOver(
-        CurrentLevel,
-        PhaseNumber,
-        FName(*GetWorld()->GetMapName()));
+    Widget->SetupGameOver( CurrentLevel,PhaseNumber,FName(*GetWorld()->GetMapName()));
 
     Widget->AddToViewport();
 
