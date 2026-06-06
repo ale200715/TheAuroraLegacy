@@ -16,6 +16,35 @@ ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 void ATheAuroraLegacyGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+    {
+        
+            FString MapName = GetWorld()->GetMapName();
+            // Quitar prefijo PIE (UEDPIE_0_, UEDPIE_1_, etc.)
+            int32 UnderscoreIdx;
+            if (MapName.StartsWith(TEXT("UEDPIE_")))
+            {
+                MapName.FindChar('_', UnderscoreIdx);         // primer _
+                MapName = MapName.RightChop(UnderscoreIdx + 1); // quita UEDPIE_
+                MapName.FindChar('_', UnderscoreIdx);         // segundo _
+                MapName = MapName.RightChop(UnderscoreIdx + 1); // quita 0_
+            }
+            GI->CurrentLevelName = FName(*MapName);
+            UE_LOG(LogTemp, Warning,
+                TEXT("GameMode: Nivel guardado en GI: %s"), *MapName);
+
+        /*/
+        // El nombre real viene del .umap — no del GetMapName() que tiene prefijos PIE
+        FString MapName = GetWorld()->GetMapName();
+        MapName.RemoveFromStart(TEXT("UEDPIE_0_"));
+        MapName.RemoveFromStart(TEXT("UEDPIE_1_"));
+        MapName.RemoveFromStart(TEXT("UEDPIE_2_"));
+        GI->CurrentLevelName = FName(*MapName);
+        UE_LOG(LogTemp, Warning, TEXT("Nivel actual guardado: %s"), *MapName);
+        /*/
+    }
+
     AActor* Found = UGameplayStatics::GetActorOfClass(GetWorld(), AGameFacade::StaticClass());
     GameFacadeInstance = Cast<AGameFacade>(Found);
 
@@ -95,20 +124,47 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
 {
     if (!GameOverWidgetClass) return;
 
+    UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(
+        GetWorld(), GameOverWidgetClass);
+    if (!Widget) return;
+
+    int32 CurrentLevelNum = 1;
+    FName LevelToRetry = FName("Level1_Drone");
+
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+    {
+        CurrentLevelNum = GI->CurrentLevel;
+        LevelToRetry = GI->CurrentLevelName; // nombre limpio sin prefijo PIE
+    }
+
+    Widget->SetupGameOver(CurrentLevelNum, PhaseNumber, LevelToRetry);
+    Widget->AddToViewport();
+
+    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+    if (PC)
+    {
+        PC->SetShowMouseCursor(true);
+        PC->SetInputMode(FInputModeUIOnly());
+    }
+}
+
+/*/
+void ATheAuroraLegacyGameMode::ShowGameOver()
+{
+    if (!GameOverWidgetClass) return;
+
     UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(GetWorld(), GameOverWidgetClass);
 
     if (!Widget) return;
 
     // PhaseNumber y CurrentLevel ahora son dinámicos — no más hardcoding
     int32 CurrentLevel = 1;
-    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+    FName LevelToRetry = FName("Level1_Drone");
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance())) {
         CurrentLevel = GI->CurrentLevel;
+        LevelToRetry = GI->CurrentLevelName;
+    }
 
-    FString MapName = GetWorld()->GetMapName();
-    MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
-    UE_LOG(LogTemp, Warning, TEXT("MapName raw: %s"), *MapName);
-    MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
-    UE_LOG(LogTemp, Warning, TEXT("MapName clean: %s"), *MapName);
 
     Widget->SetupGameOver( CurrentLevel,PhaseNumber,FName(*GetWorld()->GetMapName()));
 
@@ -121,7 +177,7 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
         PC->SetInputMode(FInputModeUIOnly());
     }
 }
-
+/*/
 // ── Good Ending (solo Level9 llega aquí) ─────────────────────────────────────
 
 void ATheAuroraLegacyGameMode::ShowGoodEnding()

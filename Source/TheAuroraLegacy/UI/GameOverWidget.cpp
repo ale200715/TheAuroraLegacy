@@ -69,14 +69,15 @@ FString UGameOverWidget::GetMessageForPhase(int32 Phase)
 
 void UGameOverWidget::OnRetryClicked()
 {
+    UE_LOG(LogTemp, Warning,
+        TEXT("Retrying level: %s"), *CurrentLevel.ToString());
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(false);
         PC->SetInputMode(FInputModeGameOnly());
     }
-
-    UGameplayStatics::OpenLevel(this, CurrentLevel);
+   UGameplayStatics::OpenLevel(this, CurrentLevel);
 }
 
 void UGameOverWidget::OnRestartClicked()

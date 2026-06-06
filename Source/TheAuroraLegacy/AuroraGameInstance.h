@@ -1,4 +1,6 @@
+
 #pragma once
+
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "AuroraGameInstance.generated.h"
@@ -9,19 +11,20 @@ class THEAURORALEGACY_API UAuroraGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    // Puntuaci�n
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 Score = 0;
 
-    // Vidas
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 Lives = 3;
 
-    // Nivel actual
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 CurrentLevel = 1;
 
-    // Funciones
+    // Nombre real del nivel actual — se guarda en BeginPlay del GameMode
+    // Se usa para Reintentar sin depender de GetMapName() que tiene prefijos PIE
+    UPROPERTY(BlueprintReadWrite, Category = "Stats")
+    FName CurrentLevelName = FName("Level1_Drone");
+
     UFUNCTION(BlueprintCallable, Category = "Stats")
     void AddScore(int32 Amount);
 
