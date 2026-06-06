@@ -1,7 +1,7 @@
 #include "DestroyerEnemy.h"
-#include "../GameModes/GameMode_Level6.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Projectiles/Phase2EnemyProjectile.h"
+#include "../../TheAuroraLegacyGameMode.h"
 #include "../AuroraGameInstance.h"
 
 ADestroyerEnemy::ADestroyerEnemy()
@@ -180,12 +180,11 @@ void ADestroyerEnemy::NotifyDeath()
         GI->AddScore(200);
         UE_LOG(LogTemp, Warning, TEXT("Destroyer destruido! +200 puntos"));
     }
-
-    AGameMode_Level6* GM = Cast<AGameMode_Level6>(
+    ATheAuroraLegacyGameMode* GM = Cast<ATheAuroraLegacyGameMode>(
         GetWorld()->GetAuthGameMode());
     if (GM)
     {
-        GM->OnEnemyDefeated();
+        GM->OnEnemyDefeated(200);
     }
 }
 

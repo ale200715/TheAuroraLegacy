@@ -1,8 +1,8 @@
 #include "TankEnemy.h"
 #include "../Strategy/ZigZagStrategy.h"
-#include "../GameModes/GameMode_Level5.h"
 #include "Kismet/GameplayStatics.h"
 #include "../Projectiles/Phase2EnemyProjectile.h"
+#include "../../TheAuroraLegacyGameMode.h"
 #include "../AuroraGameInstance.h"
 
 ATankEnemy::ATankEnemy()
@@ -86,12 +86,11 @@ void ATankEnemy::NotifyDeath()
         GI->AddScore(150);
         UE_LOG(LogTemp, Warning, TEXT("Tank destruido! +150 puntos"));
     }
-
-    AGameMode_Level5* GM = Cast<AGameMode_Level5>(
+    ATheAuroraLegacyGameMode* GM = Cast<ATheAuroraLegacyGameMode>(
         GetWorld()->GetAuthGameMode());
     if (GM)
     {
-        GM->OnEnemyDefeated();
+        GM->OnEnemyDefeated(150);
     }
 }
 
