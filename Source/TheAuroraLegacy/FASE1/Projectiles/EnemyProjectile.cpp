@@ -4,9 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "../../TheAuroraLegacyPawn.h"
-#include "../../Enemies/EnemyBase.h"
 #include "TimerManager.h"
-#include "Kismet/GameplayStatics.h" 
 
 AEnemyProjectile::AEnemyProjectile()
 {
@@ -15,24 +13,29 @@ AEnemyProjectile::AEnemyProjectile()
     CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProjectileCollision"));
     CollisionSphere->InitSphereRadius(12.f);
 
-    CollisionSphere->SetCollisionProfileName(TEXT("Projectile"));
-   
+    // WorldDynamic para no colisionar con el suelo (WorldStatic)
+    CollisionSphere->SetCollisionObjectType(ECC_WorldDynamic);
+    CollisionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    CollisionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+    // Solo detectar al Pawn
+    CollisionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    CollisionSphere->SetGenerateOverlapEvents(true);
+
+    CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemyProjectile::OnOverlapBegin);
+
     RootComponent = CollisionSphere;
 
-    ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
+    ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>( TEXT("ProjectileMesh"));
     ProjectileMesh->SetupAttachment(RootComponent);
     ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-    CollisionSphere->OnComponentHit.AddDynamic(this, &AEnemyProjectile::OnHit);
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
     if (SphereMesh.Succeeded())
     {
         ProjectileMesh->SetStaticMesh(SphereMesh.Object);
-        ProjectileMesh->SetWorldScale3D(FVector(0.3f, 0.3f, 0.3f));
+        ProjectileMesh->SetWorldScale3D(FVector(0.15f));
     }
 }
-
 
 void AEnemyProjectile::BeginPlay()
 {
@@ -42,43 +45,37 @@ void AEnemyProjectile::BeginPlay()
 void AEnemyProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
     if (IsHidden()) return;
 
-    FVector NextLocation = GetActorLocation() + GetActorForwardVector() * Speed * DeltaTime;
-    SetActorLocation(NextLocation, true);
+    FVector Next = GetActorLocation() + GetActorForwardVector() * Speed * DeltaTime;
+    // sweep=false — el overlap lo maneja el SphereComponent
+    SetActorLocation(Next, false);
 }
 
-void AEnemyProjectile::DeactivateSelf()
+void AEnemyProjectile::OnOverlapBegin( UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    SetActorHiddenInGame(true);
-    SetActorTickEnabled(false);
-    SetActorEnableCollision(false);
-    SetActorLocation(FVector::ZeroVector);
+    if (!OtherActor || OtherActor == this) return;
+    if (IsHidden()) return; // ya fue desactivado este frame
+
+    if (ATheAuroraLegacyPawn* Player = Cast<ATheAuroraLegacyPawn>(OtherActor))
+    {
+        Player->TakeDamage_Ship(Damage);
+        UE_LOG(LogTemp, Warning,TEXT("Proyectil impacto jugador: %d danio"), Damage);
+        DeactivateSelf();
+    }
 }
 
 void AEnemyProjectile::ScheduleDeactivation(float Delay)
 {
     GetWorldTimerManager().ClearTimer(DeactivateTimerHandle);
-    GetWorldTimerManager().SetTimer(DeactivateTimerHandle, this, &AEnemyProjectile::DeactivateSelf, Delay, false);
+    GetWorldTimerManager().SetTimer( DeactivateTimerHandle, this, &AEnemyProjectile::DeactivateSelf, Delay,false);
 }
 
-void AEnemyProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AEnemyProjectile::DeactivateSelf()
 {
-    if (!OtherActor || OtherActor == this) return;
-
-    ATheAuroraLegacyPawn* Player = Cast<ATheAuroraLegacyPawn>(OtherActor);
-
-    if (Player)
-    {
-        Player->TakeDamage_Ship(Damage);
-
-        UE_LOG(LogTemp, Warning, TEXT("¡El proyectil impactó al jugador y causó %f de daño!"), Damage);
-
-        DeactivateSelf(); 
-    }
-    else
-    {
-        DeactivateSelf();
-    }
+    GetWorldTimerManager().ClearTimer(DeactivateTimerHandle);
+    SetActorHiddenInGame(true);
+    SetActorTickEnabled(false);
+    SetActorEnableCollision(false);
+    // NO mover a ZeroVector — ese era el bug del piso
 }
