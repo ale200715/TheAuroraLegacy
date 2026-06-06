@@ -21,7 +21,7 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
     struct FConstructorStatics
     {
         ConstructorHelpers::FObjectFinderOptional<UStaticMesh> PlaneMesh;
-        FConstructorStatics(): PlaneMesh(TEXT("/Game/Flying/Meshes/UFO.UFO")) {}
+        FConstructorStatics(): PlaneMesh(TEXT("StaticMesh'/Game/Flying/Meshes/UFO.UFO'")) {}
     };
     static FConstructorStatics ConstructorStatics;
 

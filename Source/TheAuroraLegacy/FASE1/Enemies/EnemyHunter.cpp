@@ -18,12 +18,12 @@ AEnemyHunter::AEnemyHunter()
     EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("HunterMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder <UStaticMesh> HunterMeshAsset( TEXT("/Engine/BasicShapes/Cone.Cone"));
+    static ConstructorHelpers::FObjectFinder <UStaticMesh> HunterMeshAsset( TEXT("StaticMesh'/Game/SpaceStation/Models/Shapecraft/C8X/SM_C8X.SM_C8X'"));
 
     if (HunterMeshAsset.Succeeded())
     {
         EnemyMesh->SetStaticMesh( HunterMeshAsset.Object);
-        EnemyMesh->SetWorldScale3D( FVector(0.5f, 0.5f, 0.5f));
+        EnemyMesh->SetWorldScale3D( FVector(0.05f, 0.05f, 0.05f));
     }
 
     EnemyMesh->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics);

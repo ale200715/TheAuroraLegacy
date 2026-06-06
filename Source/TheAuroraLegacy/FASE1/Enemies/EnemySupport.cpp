@@ -19,7 +19,7 @@ AEnemySupport::AEnemySupport()
     EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("SupportMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> SupportMeshAsset( TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> SupportMeshAsset( TEXT("StaticMesh'/Game/SpaceStation/Models/Shapecraft/ESC3/SM_ESC3.SM_ESC3'"));
 
     if (SupportMeshAsset.Succeeded())
     {

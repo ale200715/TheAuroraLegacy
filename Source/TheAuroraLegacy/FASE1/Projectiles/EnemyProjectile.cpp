@@ -29,11 +29,11 @@ AEnemyProjectile::AEnemyProjectile()
     ProjectileMesh->SetupAttachment(RootComponent);
     ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("StaticMesh'/Game/SpaceStation/Models/Shapecraft/Weapons/SM_Missile_1.SM_Missile_1'"));
     if (SphereMesh.Succeeded())
     {
         ProjectileMesh->SetStaticMesh(SphereMesh.Object);
-        ProjectileMesh->SetWorldScale3D(FVector(0.15f));
+        ProjectileMesh->SetWorldScale3D(FVector(0.1f));
     }
 }
 

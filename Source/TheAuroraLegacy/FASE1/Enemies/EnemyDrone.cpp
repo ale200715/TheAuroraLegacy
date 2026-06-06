@@ -16,12 +16,12 @@ AEnemyDrone::AEnemyDrone()
     EnemyMesh = CreateDefaultSubobject <UStaticMeshComponent>(TEXT("DroneMesh"));
     RootComponent = EnemyMesh;
 
-    static ConstructorHelpers::FObjectFinder <UStaticMesh> DroneMeshAsset(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    static ConstructorHelpers::FObjectFinder <UStaticMesh> DroneMeshAsset(TEXT("StaticMesh'/Game/SpaceStation/Models/Shapecraft/PRXProbe/SM_Probe1.SM_Probe1'"));
 
     if (DroneMeshAsset.Succeeded())
     {
         EnemyMesh->SetStaticMesh(DroneMeshAsset.Object);
-        EnemyMesh->SetWorldScale3D( FVector(0.5f, 0.5f, 0.5f));
+        EnemyMesh->SetWorldScale3D( FVector(0.1f, 0.1f, 0.1f));
     }
    
     EnemyMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
