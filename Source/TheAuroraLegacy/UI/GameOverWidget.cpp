@@ -24,7 +24,6 @@ void UGameOverWidget::NativeConstruct()
         PC->SetInputMode(FInputModeUIOnly());
     }
 }
-
 void UGameOverWidget::SetupGameOver(int32 LevelWhenDied, int32 PhaseWhenDied,FName CurrentLevelName)
 {
     CurrentLevel = CurrentLevelName;
@@ -40,7 +39,6 @@ void UGameOverWidget::SetupGameOver(int32 LevelWhenDied, int32 PhaseWhenDied,FNa
         GameOverMessage->SetText(FText::FromString( GetMessageForPhase(PhaseWhenDied)));
     }
 }
-
 FString UGameOverWidget::GetMessageForPhase(int32 Phase)
 {
     switch (Phase)

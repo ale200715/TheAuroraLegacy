@@ -14,14 +14,6 @@ void UMainMenuWidget::NativeConstruct()
         PlayButton->OnClicked.AddDynamic(
             this, &UMainMenuWidget::OnPlayClicked);
 
-    if (InstructionsButton)
-        InstructionsButton->OnClicked.AddDynamic(
-            this, &UMainMenuWidget::OnInstructionsClicked);
-
-    if (HistoryButton)
-        HistoryButton->OnClicked.AddDynamic(
-            this, &UMainMenuWidget::OnHistoryClicked);
-
     if (QuitButton)
         QuitButton->OnClicked.AddDynamic(
             this, &UMainMenuWidget::OnQuitClicked);
@@ -29,30 +21,17 @@ void UMainMenuWidget::NativeConstruct()
 
 void UMainMenuWidget::OnPlayClicked()
 {
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+        GI->ResetStats();
+
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(false);
-        PC->SetInputMode(FInputModeGameOnly()); // ← esto falta
+        PC->SetInputMode(FInputModeGameOnly());
     }
 
-    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(
-        GetGameInstance()))
-    {
-        GI->ResetStats();
-    }
-
-    UGameplayStatics::OpenLevel(this, FName("Level1_Drone"));
-}
-
-void UMainMenuWidget::OnInstructionsClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("Instrucciones clickeado"));
-}
-
-void UMainMenuWidget::OnHistoryClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("Historial clickeado"));
+    UGameplayStatics::OpenLevel(this, FName("Lore_Fase1"));
 }
 
 void UMainMenuWidget::OnQuitClicked()

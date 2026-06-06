@@ -17,9 +17,9 @@ void UAuroraGameInstance::LoseLife()
 void UAuroraGameInstance::ResetStats()
 {
     Score = 0;
-    Lives = 3;
+    Lives = 10;
     CurrentLevel = 1;
-    CurrentLevelName = FName("Level1_Drone");
+    CurrentLevelName = FName("Lore_Fase1");
     UE_LOG(LogTemp, Warning, TEXT("Stats reiniciados"));
 }
 
