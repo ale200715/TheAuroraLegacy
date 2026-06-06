@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "../TheAuroraLegacyGameMode.h"
+#include "../../TheAuroraLegacyGameMode.h"
 #include "GameMode_Level2.generated.h"
 
 UCLASS()
-class THEAURORALEGACY_API AGameMode_Level2: public ATheAuroraLegacyGameMode
+class THEAURORALEGACY_API AGameMode_Level2 : public ATheAuroraLegacyGameMode
 {
     GENERATED_BODY()
 
@@ -17,9 +17,5 @@ public:
     virtual void SpawnEnemy() override;
 
 private:
-    class APhase1EnemyPool* Level2Pool;
-    void FindPool();
-
-    int32 TotalSpawned = 0;
-    int32 MaxActiveAtOnce = 3;
+    class APhase1EnemyPool* LevelPool;
 };

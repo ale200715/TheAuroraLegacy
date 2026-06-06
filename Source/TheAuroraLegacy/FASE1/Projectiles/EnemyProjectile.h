@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,33 +12,34 @@ UCLASS()
 class THEAURORALEGACY_API AEnemyProjectile : public AActor
 {
     GENERATED_BODY()
+
 public:
     AEnemyProjectile();
     virtual void Tick(float DeltaTime) override;
 
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    float Speed = 1800.f;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    int32 Damage = 1;
+
+    void ScheduleDeactivation(float Delay);
     void DeactivateSelf();
 
     USphereComponent* CollisionSphere;
     UStaticMeshComponent* ProjectileMesh;
 
-    UPROPERTY(EditAnywhere, Category = "Combat")
-    float Speed = 1800.f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-    int32 Damage = 1;
-
 protected:
     virtual void BeginPlay() override;
 
 private:
-    FTimerHandle DeactivateTimer;
+    FTimerHandle DeactivateTimerHandle;
 
     UFUNCTION()
-    void OnHit(UPrimitiveComponent* HitComp,AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
-public:
-    void ScheduleDeactivation(float Delay);
-
-private:
-    FTimerHandle DeactivateTimerHandle;
+    void OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex,
+        bool bFromSweep,
+        const FHitResult& SweepResult);
 };

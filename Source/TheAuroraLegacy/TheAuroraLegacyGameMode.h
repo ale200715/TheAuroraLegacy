@@ -19,7 +19,6 @@ public:
     ATheAuroraLegacyGameMode();
     virtual void BeginPlay() override;
 
-    // ── Configuración del nivel (se setea en cada GameMode hijo) ──
 
     UPROPERTY(EditAnywhere, Category = "Level")
     int32 EnemiesRequired = 5;
@@ -71,7 +70,8 @@ public:
 protected:
     // Contador interno — solo el padre lo modifica.
     int32 EnemiesDefeated = 0;
-
+    int32 TotalSpawned = 0;      
+    int32 MaxActiveAtOnce = 3;
     UPROPERTY(BlueprintReadOnly, Category = "Facade")
     AGameFacade* GameFacadeInstance;
 

@@ -47,8 +47,7 @@ void AEnemyDrone::BeginPlay()
 
 void AEnemyDrone::CachePlayer()
 {
-    APawn* Player =
-        UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (Player) {
         CachedPlayer = Player;
     }
@@ -95,7 +94,7 @@ void AEnemyDrone::FireProjectile()
     FVector SpawnLocation = GetActorLocation() + FVector(100.f, 0.f, 0.f);
 
     Bullet->SetActorLocation(SpawnLocation);
-    Bullet->SetActorRotation(FRotator(0.f, 0.f, 0.f));
+    Bullet->SetActorRotation(FRotator(0.f, 180.f, 0.f));
 
     Bullet->SetActorHiddenInGame(false);
     Bullet->SetActorTickEnabled(true);
@@ -118,19 +117,9 @@ void AEnemyDrone::RestartFireTimer()
 void AEnemyDrone::OnDeath()
 {
     UE_LOG(LogTemp, Warning, TEXT("Drone muerto - regresando al pool"));
-    
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade =Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade) {
-            Facade->NotifyEnemyDefeated(this);
-        }
-    }
-
+   
     Super::OnDeath();
+
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);
     SetActorEnableCollision(false);

@@ -27,8 +27,9 @@ void AEnemyBase::TakeDamageEnemy(int32 DamageAmount)
     Health -= DamageAmount;
     UE_LOG(LogTemp, Warning, TEXT("Enemigo recibió daño. Vida restante: %d"), Health);
 
-    if (Health <= 0)
+    if (Health <= 0) {
         OnDeath();
+    }
 }
 
 void AEnemyBase::OnDeath()
@@ -44,5 +45,4 @@ void AEnemyBase::OnDeath()
         }
     }
 
-    Destroy();
 }

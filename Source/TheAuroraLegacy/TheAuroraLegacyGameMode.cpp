@@ -10,7 +10,7 @@
 
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
-    PrimaryActorTick.bCanEverTick = false; // no usamos Tick en el GameMode
+    PrimaryActorTick.bCanEverTick = false; 
     DefaultPawnClass = ATheAuroraLegacyPawn::StaticClass();
 }
 
@@ -18,16 +18,31 @@ void ATheAuroraLegacyGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Buscar el Facade que debe existir en la escena como Actor
-    AActor* Found = UGameplayStatics::GetActorOfClass(
-        GetWorld(), AGameFacade::StaticClass());
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+    {
+        
+            FString MapName = GetWorld()->GetMapName();
+            // Quitar prefijo PIE (UEDPIE_0_, UEDPIE_1_, etc.)
+            int32 UnderscoreIdx;
+            if (MapName.StartsWith(TEXT("UEDPIE_")))
+            {
+                MapName.FindChar('_', UnderscoreIdx);         // primer _
+                MapName = MapName.RightChop(UnderscoreIdx + 1); // quita UEDPIE_
+                MapName.FindChar('_', UnderscoreIdx);         // segundo _
+                MapName = MapName.RightChop(UnderscoreIdx + 1); // quita 0_
+            }
+            GI->CurrentLevelName = FName(*MapName);
+            UE_LOG(LogTemp, Warning,
+                TEXT("GameMode: Nivel guardado en GI: %s"), *MapName);
+
+    }
+
+    AActor* Found = UGameplayStatics::GetActorOfClass(GetWorld(), AGameFacade::StaticClass());
     GameFacadeInstance = Cast<AGameFacade>(Found);
 
     if (!GameFacadeInstance)
     {
-        UE_LOG(LogTemp, Error,
-            TEXT("GameMode: NO se encontró GameFacade en la escena. "
-                "Agrégalo como Actor en el nivel."));
+        UE_LOG(LogTemp, Error,TEXT("GameMode: NO se encontró GameFacade en la escena. Agrégalo como Actor en el nivel."));
     }
 
     // Actualizar HUD al iniciar nivel
@@ -62,6 +77,7 @@ void ATheAuroraLegacyGameMode::BeginPlay()
 
     // Arrancar el timer de spawn — los hijos sobreescriben SpawnEnemy()
     GetWorldTimerManager().SetTimer(SpawnTimerHandle,this,&ATheAuroraLegacyGameMode::SpawnEnemy,SpawnInterval,true);
+
 }
 
 // ── Spawn ─────────────────────────────────────────────────────────────────────
@@ -108,12 +124,7 @@ void ATheAuroraLegacyGameMode::CheckLevelComplete()
     // Level9 sobreescribe CheckLevelComplete() para llamar ShowGoodEnding().
     // El resto de niveles llega aquí y carga el siguiente nivel.
     FTimerHandle TransitionTimer;
-    GetWorldTimerManager().SetTimer(
-        TransitionTimer,
-        this,
-        &ATheAuroraLegacyGameMode::LoadNextLevel,
-        2.f,
-        false);
+    GetWorldTimerManager().SetTimer( TransitionTimer, this,&ATheAuroraLegacyGameMode::LoadNextLevel, 2.f,false);
 }
 
 void ATheAuroraLegacyGameMode::LoadNextLevel()
@@ -149,19 +160,18 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
 
     UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(
         GetWorld(), GameOverWidgetClass);
-
     if (!Widget) return;
 
-    // PhaseNumber y CurrentLevel ahora son dinámicos — no más hardcoding
-    int32 CurrentLevel = 1;
+    int32 CurrentLevelNum = 1;
+    FName LevelToRetry = FName("Level1_Drone");
+
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
-        CurrentLevel = GI->CurrentLevel;
+    {
+        CurrentLevelNum = GI->CurrentLevel;
+        LevelToRetry = GI->CurrentLevelName; // nombre limpio sin prefijo PIE
+    }
 
-    Widget->SetupGameOver(
-        CurrentLevel,
-        PhaseNumber,
-        FName(*GetWorld()->GetMapName()));
-
+    Widget->SetupGameOver(CurrentLevelNum, PhaseNumber, LevelToRetry);
     Widget->AddToViewport();
 
     APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);

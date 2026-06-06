@@ -6,13 +6,10 @@
 #include "../../TheAuroraLegacyGameMode.h"
 #include "GameMode_Level1.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class THEAURORALEGACY_API AGameMode_Level1 : public ATheAuroraLegacyGameMode
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     AGameMode_Level1();
@@ -20,12 +17,6 @@ public:
     virtual void SpawnEnemy() override;
 
 private:
-    class APhase1EnemyPool* Level1Pool;
-
+    class APhase1EnemyPool* LevelPool;
     void FindPool();
-
-    int32 TotalSpawned = 0;
-
-    int32 MaxActiveAtOnce = 3;
-	
 };

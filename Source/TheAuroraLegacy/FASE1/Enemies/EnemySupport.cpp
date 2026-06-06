@@ -128,14 +128,14 @@ void AEnemySupport::FireProjectile()
     }
 
     FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -50.f);
-
+    
     Bullet->SetActorLocation(SpawnLocation);
     Bullet->SetActorRotation(ShootRotation);
     Bullet->Speed = 600.f;
     Bullet->SetActorHiddenInGame(false);
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
-
+    
     FTimerHandle DeactivateTimer;
     FTimerDelegate DeactivateDelegate;
     DeactivateDelegate.BindUObject( Bullet, &AEnemyProjectile::DeactivateSelf);
@@ -161,17 +161,7 @@ void AEnemySupport::OnDeath()
 
     OriginalPlayerSpeed = 0.f;
 
-    TArray<AActor*> FoundFacades;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(),AGameFacade::StaticClass(), FoundFacades);
-
-    if (FoundFacades.Num() > 0)
-    {
-        AGameFacade* Facade = Cast<AGameFacade>(FoundFacades[0]);
-        if (Facade) {
-            Facade->NotifyEnemyDefeated(this);
-        }
-            
-    }
+    Super::OnDeath();
 
     SetActorHiddenInGame(true);
     SetActorTickEnabled(false);

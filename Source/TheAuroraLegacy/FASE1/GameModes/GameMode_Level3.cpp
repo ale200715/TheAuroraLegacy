@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "GameMode_Level3.h"
 #include "../Pool/Phase1EnemyPool.h"
 #include "../Enemies/EnemySupport.h"
-#include "../Core/GameFacade.h"
+#include "../../Core/GameFacade.h"
 #include "Kismet/GameplayStatics.h"
 
 AGameMode_Level3::AGameMode_Level3()
@@ -12,79 +11,49 @@ AGameMode_Level3::AGameMode_Level3()
     EnemiesRequired = 8;
     SpawnInterval = 4.f;
     SpawnDistance = 800.f;
-
+    PhaseNumber = 1;
     NextLevelName = FName("Lore_Fase2");
 }
 
 void AGameMode_Level3::BeginPlay()
 {
-    FindPool();
+    AActor* Found = UGameplayStatics::GetActorOfClass( GetWorld(), APhase1EnemyPool::StaticClass());
+    LevelPool = Cast<APhase1EnemyPool>(Found);
 
-    if (Level3Pool)
+    if (LevelPool)
     {
-        Level3Pool->EnemyClass = AEnemySupport::StaticClass();
-
-        Level3Pool->InitializePool();
-
-        UE_LOG(LogTemp, Warning, TEXT("Level3: Pool inicializado con Supports"));
+        LevelPool->EnemyClass = AEnemySupport::StaticClass();
+        LevelPool->InitializePool();
     }
-   
-    Super::BeginPlay();
 
-    UE_LOG(LogTemp, Warning,TEXT("Level3: Iniciado. Derrotar %d supports para pasar"), EnemiesRequired);
+    Super::BeginPlay();
 }
 
 void AGameMode_Level3::SpawnEnemy()
 {
-    if (EnemiesDefeated >= EnemiesRequired)
-    {
-        GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-        return;
-    }
+    if (!LevelPool) return;
 
-    if (TotalSpawned - EnemiesDefeated >= MaxActiveAtOnce)
-        return;
+    int32 ActiveCount = (TotalSpawned - EnemiesDefeated);
+    if (ActiveCount >= MaxActiveAtOnce) return;
 
-    if (!Level3Pool)
-    {
-        FindPool();
-        if (!Level3Pool) return;
-    }
+    AEnemyBase* Enemy = LevelPool->GetEnemyFromPool();
+    if (!Enemy) return;
 
-    AEnemyBase* Support = Level3Pool->GetEnemyFromPool();
-
-    APawn* Player = UGameplayStatics::GetPlayerPawn( GetWorld(), 0);
-
+    APawn* Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
     if (!Player) return;
 
+    FVector SpawnLocation = Player->GetActorLocation() + Player->GetActorForwardVector() * SpawnDistance + FVector(0.f, FMath::RandRange(-600.f, 600.f), FMath::RandRange(100.f, 300.f));
 
-    float RandomY = FMath::RandRange(-600.f, 600.f);
-    float RandomZ = FMath::RandRange( 100.f, 300.f);
+    Enemy->SetActorLocation(SpawnLocation);
+    Enemy->SetActorHiddenInGame(false);
+    Enemy->SetActorEnableCollision(true);
+    Enemy->SetActorTickEnabled(true);
 
-    FVector SpawnLocation = Player->GetActorLocation() +  Player->GetActorForwardVector() * SpawnDistance;
+    if (GameFacadeInstance)
+        GameFacadeInstance->ConfigureEnemy(Enemy, EEnemyType::Support);
 
-    SpawnLocation.Y = RandomY;
-    SpawnLocation.Z += RandomZ;
-
-    Support->SetActorLocation(SpawnLocation);
-    Support->SetActorHiddenInGame(false);
-    Support->SetActorEnableCollision(true);
-    Support->SetActorTickEnabled(true);
-    Support->Health = 2;
-
-    AEnemySupport* SupportCast = Cast<AEnemySupport>(Support);
-    if (SupportCast) { SupportCast->RestartFireTimer();
-    }
+    if (AEnemySupport* Support = Cast<AEnemySupport>(Enemy))
+        Support->RestartFireTimer();
 
     TotalSpawned++;
-
-    UE_LOG(LogTemp, Warning, TEXT("Level3: Support %d spawneado. Derrotados: %d/%d"),TotalSpawned, EnemiesDefeated, EnemiesRequired);
-}
-
-void AGameMode_Level3::FindPool()
-{
-    AActor* FoundActor = UGameplayStatics::GetActorOfClass( GetWorld(), APhase1EnemyPool::StaticClass());
-
-    Level3Pool = Cast<APhase1EnemyPool>(FoundActor);
-
 }
