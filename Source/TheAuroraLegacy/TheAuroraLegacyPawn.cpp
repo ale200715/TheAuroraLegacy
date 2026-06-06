@@ -10,6 +10,8 @@
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 #include "TimerManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "UI/AuroraHUD.h"
 
 ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
 {
@@ -144,6 +146,15 @@ void ATheAuroraLegacyPawn::Fire()
 void ATheAuroraLegacyPawn::TakeDamage_Ship( int32 DamageAmount)
 {
     Lives -= DamageAmount;
+
+    AAuroraHUD* HUD = Cast<AAuroraHUD>(
+        UGameplayStatics::GetPlayerController(
+            GetWorld(), 0)->GetHUD());
+    if (HUD)
+    {
+        HUD->UpdateHealth(Lives);
+    }
+
     if (Lives <= 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("Game Over - Sin vidas"));

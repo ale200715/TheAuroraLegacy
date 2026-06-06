@@ -6,6 +6,7 @@
 #include "Core/GameFacade.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "UI/AuroraHUD.h"
 
 ATheAuroraLegacyGameMode::ATheAuroraLegacyGameMode()
 {
@@ -29,13 +30,38 @@ void ATheAuroraLegacyGameMode::BeginPlay()
                 "Agrégalo como Actor en el nivel."));
     }
 
+    // Actualizar HUD al iniciar nivel
+    AAuroraHUD* HUD = Cast<AAuroraHUD>(
+        UGameplayStatics::GetPlayerController(
+            GetWorld(), 0)->GetHUD());
+    if (HUD)
+    {
+        // Mostrar nivel actual desde GameInstance
+        if (UAuroraGameInstance* GI =
+            Cast<UAuroraGameInstance>(GetGameInstance()))
+        {
+            FString MapName = GetWorld()->GetMapName();
+            MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+            HUD->UpdateLevel(GI->CurrentLevel);
+            UE_LOG(LogTemp, Warning, TEXT("Mapa actual: %s"), *MapName);
+        }
+
+        // Mostrar vida completa al iniciar nivel
+        HUD->UpdateHealth(3);
+    }
+
+    // Resetear vida del jugador al iniciar nivel
+    ATheAuroraLegacyPawn* Player =
+        Cast<ATheAuroraLegacyPawn>(
+            UGameplayStatics::GetPlayerPawn(
+                GetWorld(), 0));
+    if (Player)
+    {
+        Player->Lives = 3;
+    }
+
     // Arrancar el timer de spawn — los hijos sobreescriben SpawnEnemy()
-    GetWorldTimerManager().SetTimer(
-        SpawnTimerHandle,
-        this,
-        &ATheAuroraLegacyGameMode::SpawnEnemy,
-        SpawnInterval,
-        true);
+    GetWorldTimerManager().SetTimer(SpawnTimerHandle,this,&ATheAuroraLegacyGameMode::SpawnEnemy,SpawnInterval,true);
 }
 
 // ── Spawn ─────────────────────────────────────────────────────────────────────
@@ -51,8 +77,18 @@ void ATheAuroraLegacyGameMode::OnEnemyDefeated(int32 ScoreValue)
 {
     EnemiesDefeated++;
 
-    // NOTA: el score ya fue sumado por el Facade en NotifyEnemyDefeated().
-    // No llamar AddScore() aquí — evita doblar el score.
+    // Actualizar HUD con score actual del GameInstance
+    AAuroraHUD* HUD = Cast<AAuroraHUD>(
+        UGameplayStatics::GetPlayerController(
+            GetWorld(), 0)->GetHUD());
+    if (HUD)
+    {
+        if (UAuroraGameInstance* GI =
+            Cast<UAuroraGameInstance>(GetGameInstance()))
+        {
+            HUD->UpdateScore(GI->Score);
+        }
+    }
 
     UE_LOG(LogTemp, Warning,
         TEXT("GameMode: %d / %d enemigos derrotados"),
