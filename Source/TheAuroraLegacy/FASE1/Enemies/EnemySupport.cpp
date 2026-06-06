@@ -128,14 +128,23 @@ void AEnemySupport::FireProjectile()
     }
 
     FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -50.f);
-
+    /*/
+    Bullet->SetActorLocation(SpawnLocation);
+    Bullet->SetActorRotation(ShootRotation);
+    Bullet->Speed = 600.f;
+    Bullet->SetActorHiddenInGame(false);
+    Bullet->SetActorTickEnabled(true);
+    Bullet->SetActorEnableCollision(true); // ← siempre al final
+    Bullet->ScheduleDeactivation(5.f);
+    /*/
+    
     Bullet->SetActorLocation(SpawnLocation);
     Bullet->SetActorRotation(ShootRotation);
     Bullet->Speed = 600.f;
     Bullet->SetActorHiddenInGame(false);
     Bullet->SetActorTickEnabled(true);
     Bullet->SetActorEnableCollision(true);
-
+    
     FTimerHandle DeactivateTimer;
     FTimerDelegate DeactivateDelegate;
     DeactivateDelegate.BindUObject( Bullet, &AEnemyProjectile::DeactivateSelf);

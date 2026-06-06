@@ -95,8 +95,7 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
 {
     if (!GameOverWidgetClass) return;
 
-    UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(
-        GetWorld(), GameOverWidgetClass);
+    UGameOverWidget* Widget = CreateWidget<UGameOverWidget>(GetWorld(), GameOverWidgetClass);
 
     if (!Widget) return;
 
@@ -104,6 +103,12 @@ void ATheAuroraLegacyGameMode::ShowGameOver()
     int32 CurrentLevel = 1;
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
         CurrentLevel = GI->CurrentLevel;
+
+    FString MapName = GetWorld()->GetMapName();
+    MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+    UE_LOG(LogTemp, Warning, TEXT("MapName raw: %s"), *MapName);
+    MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+    UE_LOG(LogTemp, Warning, TEXT("MapName clean: %s"), *MapName);
 
     Widget->SetupGameOver( CurrentLevel,PhaseNumber,FName(*GetWorld()->GetMapName()));
 

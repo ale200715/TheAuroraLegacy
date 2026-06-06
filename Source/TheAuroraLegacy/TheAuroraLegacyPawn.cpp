@@ -138,7 +138,6 @@ void ATheAuroraLegacyPawn::TakeDamage_Ship(int32 DamageAmount)
         SetActorTickEnabled(false);
     }
 }
-
 void ATheAuroraLegacyPawn::ResetFire()
 {
     bCanFire = true;
