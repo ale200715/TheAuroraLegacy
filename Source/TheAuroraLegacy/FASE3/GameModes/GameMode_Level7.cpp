@@ -7,7 +7,7 @@
 AGameMode_Level7::AGameMode_Level7()
 {
     EnemiesRequired = 15;
-    SpawnInterval = 15.f;
+    SpawnInterval = 10.f;
     SpawnDistance = 5000.f;
 
     NextLevelName = FName("Level8");

@@ -3,6 +3,7 @@
 
 #include "Phase3EnemyPool.h"
 #include "../Enemies/Enemy_Torreta.h"
+#include "../Interceptor.h"
 
 APhase3EnemyPool::APhase3EnemyPool()
 {
@@ -58,6 +59,14 @@ AEnemyBase* APhase3EnemyPool::GetPooledEnemy()
             Enemy->SetActorHiddenInGame(false);
             Enemy->SetActorEnableCollision(true);
             Enemy->SetActorTickEnabled(true);
+
+            // Asignar referencia al pool en el Interceptor
+            AInterceptor* Interceptor =
+                Cast<AInterceptor>(Enemy);
+            if (Interceptor)
+            {
+                Interceptor->OwnerPool = this;
+            }
 
             // Iniciar comportamiento especifico
             // de la torreta al activarse

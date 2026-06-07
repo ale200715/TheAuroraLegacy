@@ -2,8 +2,6 @@
 
 
 #include "TorretaProjectile.h"
-#include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
 #include "../../TheAuroraLegacyPawn.h"
 
 ATorretaProjectile::ATorretaProjectile()
@@ -13,8 +11,17 @@ ATorretaProjectile::ATorretaProjectile()
     CollisionSphere = CreateDefaultSubobject
         <USphereComponent>(TEXT("CollisionSphere"));
     CollisionSphere->InitSphereRadius(15.f);
+    CollisionSphere->SetCollisionObjectType(
+        ECC_WorldDynamic);
     CollisionSphere->SetCollisionEnabled(
         ECollisionEnabled::QueryOnly);
+    CollisionSphere->SetCollisionResponseToAllChannels(
+        ECR_Ignore);
+    CollisionSphere->SetCollisionResponseToChannel(
+        ECC_Pawn, ECR_Overlap);
+    CollisionSphere->SetGenerateOverlapEvents(true);
+    CollisionSphere->OnComponentBeginOverlap.AddDynamic(
+        this, &ATorretaProjectile::OnOverlapBegin);
     RootComponent = CollisionSphere;
 
     MeshComponent = CreateDefaultSubobject
@@ -24,7 +31,7 @@ ATorretaProjectile::ATorretaProjectile()
         ECollisionEnabled::NoCollision);
 
     // Se destruye solo despues de 3 segundos
-    InitialLifeSpan = 3.f;
+    InitialLifeSpan = 6.f;
 }
 
 void ATorretaProjectile::BeginPlay()
@@ -37,42 +44,30 @@ void ATorretaProjectile::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     // Mover hacia adelante
-    FVector StartLocation = GetActorLocation();
-    FVector NextLocation = StartLocation +
+    FVector Next = GetActorLocation() +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;
 
-    // LineTrace para detectar al jugador
-    FHitResult HitResult;
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(this);
-
-    bool bHit = GetWorld()->LineTraceSingleByChannel(
-        HitResult,
-        StartLocation,
-        NextLocation,
-        ECC_Visibility,
-        QueryParams);
-
-    if (bHit)
-    {
-        AActor* HitActor = HitResult.GetActor();
-
-        // Verificar si golpeo al jugador
-        ATheAuroraLegacyPawn* Player =
-            Cast<ATheAuroraLegacyPawn>(HitActor);
-        if (Player)
-        {
-            Player->TakeDamage_Ship(Damage);
-            UE_LOG(LogTemp, Warning,
-                TEXT("Nave recibio danio"));
-            Destroy();
-            return;
-        }
-        Destroy();
-        return;
-    }
-
-    SetActorLocation(NextLocation);
+    SetActorLocation(Next, false);
 }
 
+void ATorretaProjectile::OnOverlapBegin(
+    UPrimitiveComponent* OverlappedComp,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    if (!OtherActor || OtherActor == this) return;
+
+    ATheAuroraLegacyPawn* Player =
+        Cast<ATheAuroraLegacyPawn>(OtherActor);
+    if (Player)
+    {
+        Player->TakeDamage_Ship(Damage);
+        UE_LOG(LogTemp, Warning,
+            TEXT("Torreta golpeo al jugador"));
+        Destroy();
+    }
+}

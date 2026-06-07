@@ -14,14 +14,6 @@ void UMainMenuWidget::NativeConstruct()
         PlayButton->OnClicked.AddDynamic(
             this, &UMainMenuWidget::OnPlayClicked);
 
-    if (InstructionsButton)
-        InstructionsButton->OnClicked.AddDynamic(
-            this, &UMainMenuWidget::OnInstructionsClicked);
-
-    if (HistoryButton)
-        HistoryButton->OnClicked.AddDynamic(
-            this, &UMainMenuWidget::OnHistoryClicked);
-
     if (QuitButton)
         QuitButton->OnClicked.AddDynamic(
             this, &UMainMenuWidget::OnQuitClicked);
@@ -43,16 +35,6 @@ void UMainMenuWidget::OnPlayClicked()
     }
 
     UGameplayStatics::OpenLevel(this, FName("Level1_Drone"));
-}
-
-void UMainMenuWidget::OnInstructionsClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("Instrucciones clickeado"));
-}
-
-void UMainMenuWidget::OnHistoryClicked()
-{
-    UE_LOG(LogTemp, Warning, TEXT("Historial clickeado"));
 }
 
 void UMainMenuWidget::OnQuitClicked()

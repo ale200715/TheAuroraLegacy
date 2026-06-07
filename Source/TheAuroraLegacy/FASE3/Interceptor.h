@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "EnemyBase.h"
 #include "Components/StaticMeshComponent.h"
+#include "Pool/Phase3EnemyPool.h"
 #include "Interceptor.generated.h"
 
 UCLASS()
@@ -20,11 +21,16 @@ public:
         Category = "Components")
     UStaticMeshComponent* MeshComponent;
 
+    // Referencia al pool para devolver el enemigo
+    UPROPERTY()
+    APhase3EnemyPool* OwnerPool;
+
 protected:
     virtual void BeginPlay() override;
     virtual void MoveEnemy(float DeltaTime) override;
     virtual void NotifyActorBeginOverlap(
         AActor* OtherActor) override;
+    virtual void OnDeath() override;
 
 private:
     FVector MoveDirection;

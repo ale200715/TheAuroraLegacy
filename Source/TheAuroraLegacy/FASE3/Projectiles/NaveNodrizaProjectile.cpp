@@ -2,9 +2,7 @@
 
 #include "NaveNodrizaProjectile.h"
 #include "../../TheAuroraLegacyPawn.h"
-#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Actor.h"
 
 ANaveNodrizaProjectile::ANaveNodrizaProjectile()
 {
@@ -13,8 +11,17 @@ ANaveNodrizaProjectile::ANaveNodrizaProjectile()
     CollisionSphere = CreateDefaultSubobject
         <USphereComponent>(TEXT("CollisionSphere"));
     CollisionSphere->InitSphereRadius(15.f);
+    CollisionSphere->SetCollisionObjectType(
+        ECC_WorldDynamic);
     CollisionSphere->SetCollisionEnabled(
         ECollisionEnabled::QueryOnly);
+    CollisionSphere->SetCollisionResponseToAllChannels(
+        ECR_Ignore);
+    CollisionSphere->SetCollisionResponseToChannel(
+        ECC_Pawn, ECR_Overlap);
+    CollisionSphere->SetGenerateOverlapEvents(true);
+    CollisionSphere->OnComponentBeginOverlap.AddDynamic(
+        this, &ANaveNodrizaProjectile::OnOverlapBegin);
     RootComponent = CollisionSphere;
 
     MeshComponent = CreateDefaultSubobject
@@ -23,7 +30,7 @@ ANaveNodrizaProjectile::ANaveNodrizaProjectile()
     MeshComponent->SetCollisionEnabled(
         ECollisionEnabled::NoCollision);
 
-    InitialLifeSpan = 8.f;
+    InitialLifeSpan = 15.f;
 }
 
 void ANaveNodrizaProjectile::BeginPlay()
@@ -52,37 +59,30 @@ void ANaveNodrizaProjectile::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    FVector StartLocation = GetActorLocation();
-    FVector NextLocation = StartLocation +
+    FVector Next = GetActorLocation() +
         GetActorForwardVector() *
         ProjectileSpeed * DeltaTime;
 
-    FHitResult HitResult;
-    FCollisionQueryParams QueryParams;
-    QueryParams.AddIgnoredActor(this);
-
-    bool bHit = GetWorld()->LineTraceSingleByChannel(
-        HitResult,
-        StartLocation,
-        NextLocation,
-        ECC_Visibility,
-        QueryParams);
-
-    if (bHit)
-    {
-        AActor* HitActor = HitResult.GetActor();
-        ATheAuroraLegacyPawn* Player =
-            Cast<ATheAuroraLegacyPawn>(HitActor);
-        if (Player)
-        {
-            Player->TakeDamage_Ship(Damage);
-            UE_LOG(LogTemp, Warning,
-                TEXT("Boss golpeo al jugador"));
-        }
-        Destroy();
-        return;
-    }
-
-    SetActorLocation(NextLocation);
+    SetActorLocation(Next, false);
 }
 
+void ANaveNodrizaProjectile::OnOverlapBegin(
+    UPrimitiveComponent* OverlappedComp,
+    AActor* OtherActor,
+    UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult)
+{
+    if (!OtherActor || OtherActor == this) return;
+
+    ATheAuroraLegacyPawn* Player =
+        Cast<ATheAuroraLegacyPawn>(OtherActor);
+    if (Player)
+    {
+        Player->TakeDamage_Ship(Damage);
+        UE_LOG(LogTemp, Warning,
+            TEXT("Boss golpeo al jugador"));
+        Destroy();
+    }
+}

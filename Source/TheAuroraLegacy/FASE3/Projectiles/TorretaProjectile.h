@@ -24,13 +24,22 @@ public:
     UPROPERTY(EditAnywhere, Category = "Combat")
     int32 Damage = 1;
 
-protected:
-    virtual void BeginPlay() override;
-
-private:
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* MeshComponent;
 
     UPROPERTY(VisibleAnywhere)
     USphereComponent* CollisionSphere;
+
+protected:
+    virtual void BeginPlay() override;
+
+private:
+    UFUNCTION()
+    void OnOverlapBegin(
+        UPrimitiveComponent* OverlappedComp,
+        AActor* OtherActor,
+        UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex,
+        bool bFromSweep,
+        const FHitResult& SweepResult);
 };

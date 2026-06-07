@@ -9,9 +9,9 @@ AGameMode_Level9::AGameMode_Level9()
 {
     // Solo 1 enemigo: la Nave Nodriza
     EnemiesRequired = 1;
-    // Aparece a los 3 segundos de iniciar
-    SpawnInterval = 3.f;
-    SpawnDistance = 3000.f;
+    // Aparece a los 60 segundos de iniciar
+    SpawnInterval = 60.f;
+    SpawnDistance = 9000.f;
 }
 
 void AGameMode_Level9::BeginPlay()

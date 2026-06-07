@@ -8,19 +8,19 @@ AGameMode_Level8::AGameMode_Level8()
 {
     // Segun documento: 5 torretas
     EnemiesRequired = 5;
-    // Aparece una torreta cada 20 segundos
-    SpawnInterval = 20.f;
-    SpawnDistance = 3000.f;
+    // Aparece una torreta cada 50 segundos
+    SpawnInterval = 50.f;
+    SpawnDistance = 6000.f;
 
     // Posiciones relativas al jugador
     // X = izquierda/derecha
     // Y = distancia adelante
     // Z = altura
-    SpawnPositions.Add(FVector(-600.f, 3000.f, 0.f));
+    SpawnPositions.Add(FVector(-1500.f, 3000.f, 0.f));
     SpawnPositions.Add(FVector(0.f, 3500.f, 0.f));
-    SpawnPositions.Add(FVector(600.f, 3000.f, 0.f));
-    SpawnPositions.Add(FVector(-400.f, 4000.f, 0.f));
-    SpawnPositions.Add(FVector(400.f, 4000.f, 0.f));
+    SpawnPositions.Add(FVector(1500.f, 3000.f, 0.f));
+    SpawnPositions.Add(FVector(-1000.f, 4500.f, 0.f));
+    SpawnPositions.Add(FVector(1000.f, 4500.f, 0.f));
 
 	NextLevelName = FName("Level9");
 }

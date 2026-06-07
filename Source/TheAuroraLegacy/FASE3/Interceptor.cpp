@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "../TheAuroraLegacyPawn.h"
+#include "../Core/GameFacade.h"
 
 void AInterceptor::NotifyActorBeginOverlap(
     AActor* OtherActor)
@@ -19,8 +20,16 @@ void AInterceptor::NotifyActorBeginOverlap(
         UE_LOG(LogTemp, Warning,
             TEXT("Interceptor golpeo al jugador"));
 
-        // Destruirse al impactar
-        Destroy();
+        // No dar score por contacto
+        if (OwnerPool)
+        {
+            Health = 3;
+            OwnerPool->ReturnToPool(this);
+        }
+        else
+        {
+            Destroy();
+        }
     }
 }
 
@@ -35,8 +44,7 @@ AInterceptor::AInterceptor()
     MoveSpeed = 300.f; // Velocidad muy alta
 
     // Componente visual
-    MeshComponent = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComponent;
 
     // Colision
@@ -108,7 +116,53 @@ void AInterceptor::MoveEnemy(float DeltaTime)
             Player->TakeDamage_Ship(ContactDamage);
             UE_LOG(LogTemp, Warning,
                 TEXT("Interceptor contacto con jugador"));
-            Destroy();
+
+            // No llamar OnDeath() — el contacto no da score
+            // Solo devolver al pool sin notificar al Facade
+            if (OwnerPool)
+            {
+                Health = 3;
+                OwnerPool->ReturnToPool(this);
+            }
+            else
+            {
+                Destroy();
+            }
         }
     }
+}
+
+void AInterceptor::OnDeath()
+{
+    // Notificar al Facade para score
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
+    {
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->NotifyEnemyDefeated(this);
+        }
+    }
+
+    // Devolver al pool en lugar de destruirse
+    if (OwnerPool)
+    {
+        // Resetear vida
+        Health = 3;
+        OwnerPool->ReturnToPool(this);
+    }
+    else
+    {
+        Destroy();
+    }
+
+    UE_LOG(LogTemp, Warning,
+        TEXT("Interceptor devuelto al pool"));
 }

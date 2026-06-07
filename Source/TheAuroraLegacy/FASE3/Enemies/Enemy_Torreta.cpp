@@ -3,6 +3,7 @@
 #include "Enemy_Torreta.h"
 #include "Kismet/GameplayStatics.h"
 #include "../../TheAuroraLegacyGameMode.h"
+#include "../../Core/GameFacade.h"
 
 AEnemy_Torreta::AEnemy_Torreta()
 {
@@ -15,8 +16,7 @@ AEnemy_Torreta::AEnemy_Torreta()
     MoveSpeed = 0.f; // Fija, no se mueve
 
     // Componente visual
-    MeshComponent = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComponent;
 }
 
@@ -93,21 +93,27 @@ void AEnemy_Torreta::OnDeath()
     // Detener disparo
     GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
-    // Notificar al GameMode
-    ATheAuroraLegacyGameMode* GM =
-        Cast<ATheAuroraLegacyGameMode>(
-            GetWorld()->GetAuthGameMode());
-    if (GM)
+    // Notificar al Facade para que sume el score
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
     {
-        GM->OnEnemyDefeated(ScoreValue);
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->NotifyEnemyDefeated(this);
+        }
     }
 
-    // Devolver al pool en lugar de destruirse
+    // Devolver al pool
     SetActorHiddenInGame(true);
     SetActorEnableCollision(false);
     SetActorTickEnabled(false);
-
-    // Resetear vida para reutilizar
     Health = 6;
 
     UE_LOG(LogTemp, Warning,

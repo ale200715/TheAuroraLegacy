@@ -15,14 +15,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Menu")
     void OnPlayClicked();
 
-    // Boton Instrucciones
-    UFUNCTION(BlueprintCallable, Category = "Menu")
-    void OnInstructionsClicked();
-
-    // Boton Historial
-    UFUNCTION(BlueprintCallable, Category = "Menu")
-    void OnHistoryClicked();
-
     // Boton Salir
     UFUNCTION(BlueprintCallable, Category = "Menu")
     void OnQuitClicked();
@@ -31,12 +23,6 @@ protected:
     // Botones del menu
     UPROPERTY(meta = (BindWidget))
     class UButton* PlayButton;
-
-    UPROPERTY(meta = (BindWidget))
-    class UButton* InstructionsButton;
-
-    UPROPERTY(meta = (BindWidget))
-    class UButton* HistoryButton;
 
     UPROPERTY(meta = (BindWidget))
     class UButton* QuitButton;

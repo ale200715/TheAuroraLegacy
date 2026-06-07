@@ -129,6 +129,8 @@ void ATheAuroraLegacyPawn::TakeDamage_Ship(int32 DamageAmount)
 {
     Lives -= DamageAmount;
 
+    Lives = FMath::Max(Lives, 0);
+
     AAuroraHUD* HUD = Cast<AAuroraHUD>(
         UGameplayStatics::GetPlayerController(
             GetWorld(), 0)->GetHUD());

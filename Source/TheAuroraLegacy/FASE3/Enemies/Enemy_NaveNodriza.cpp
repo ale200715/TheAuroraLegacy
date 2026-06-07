@@ -6,6 +6,7 @@
 #include "../../TheAuroraLegacyGameMode.h"
 #include "../StateMachine/ProtectedState.h"
 #include "../StateMachine/VulnerableState.h"
+#include "../../Core/GameFacade.h"
 
 AEnemy_NaveNodriza::AEnemy_NaveNodriza()
 {
@@ -18,8 +19,7 @@ AEnemy_NaveNodriza::AEnemy_NaveNodriza()
     MoveSpeed = 200.f; // Muy lenta
 
     // Componente visual
-    MeshComponent = CreateDefaultSubobject
-        <UStaticMeshComponent>(TEXT("MeshComponent"));
+    MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     RootComponent = MeshComponent;
 
     // Empieza con escudo activo
@@ -153,13 +153,21 @@ void AEnemy_NaveNodriza::FireInAllDirections()
 
 void AEnemy_NaveNodriza::OnDeath()
 {
-    // Notificar al GameMode
-    ATheAuroraLegacyGameMode* GM =
-        Cast<ATheAuroraLegacyGameMode>(
-            GetWorld()->GetAuthGameMode());
-    if (GM)
+    // Notificar al Facade
+    TArray<AActor*> FoundFacades;
+    UGameplayStatics::GetAllActorsOfClass(
+        GetWorld(),
+        AGameFacade::StaticClass(),
+        FoundFacades);
+
+    if (FoundFacades.Num() > 0)
     {
-        GM->OnEnemyDefeated(ScoreValue);
+        AGameFacade* Facade =
+            Cast<AGameFacade>(FoundFacades[0]);
+        if (Facade)
+        {
+            Facade->NotifyEnemyDefeated(this);
+        }
     }
 
     UE_LOG(LogTemp, Warning,
