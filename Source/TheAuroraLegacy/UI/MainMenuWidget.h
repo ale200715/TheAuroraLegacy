@@ -14,7 +14,10 @@ public:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     // Boton Salir
+=======
+>>>>>>> c81aec3266a04ab31b48f323a9ba975e1613e877
 =======
 >>>>>>> c81aec3266a04ab31b48f323a9ba975e1613e877
 =======

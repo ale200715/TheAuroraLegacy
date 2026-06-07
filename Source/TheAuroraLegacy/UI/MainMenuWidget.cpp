@@ -33,6 +33,7 @@ void UMainMenuWidget::OnPlayClicked()
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(
         GetGameInstance()))
     {
@@ -40,6 +41,9 @@ void UMainMenuWidget::OnPlayClicked()
     }
 
     UGameplayStatics::OpenLevel(this, FName("Level1_Drone"));
+=======
+    UGameplayStatics::OpenLevel(this, FName("Lore_Fase1"));
+>>>>>>> c81aec3266a04ab31b48f323a9ba975e1613e877
 =======
     UGameplayStatics::OpenLevel(this, FName("Lore_Fase1"));
 >>>>>>> c81aec3266a04ab31b48f323a9ba975e1613e877
