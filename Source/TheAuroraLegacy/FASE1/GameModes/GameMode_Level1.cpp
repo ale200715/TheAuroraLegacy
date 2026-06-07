@@ -26,7 +26,7 @@ void AGameMode_Level1::BeginPlay()
         LevelPool->InitializePool();
     }
 
-    Super::BeginPlay(); // busca el Facade e inicia el timer de spawn
+    Super::BeginPlay(); 
 }
 
 void AGameMode_Level1::SpawnEnemy()

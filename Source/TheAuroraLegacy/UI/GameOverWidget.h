@@ -26,10 +26,10 @@ protected:
     // Mensaje según la fase
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* GameOverMessage;
-    
+    /*/
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* LevelText;
-   
+   /*/
     // Botón reintentar
     UPROPERTY(meta = (BindWidget))
     class UButton* RetryButton;

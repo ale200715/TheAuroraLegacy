@@ -147,6 +147,7 @@ void ATheAuroraLegacyPawn::TakeDamage_Ship(int32 DamageAmount)
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
         SetActorTickEnabled(false);
+        
     }
 }
 void ATheAuroraLegacyPawn::ResetFire()
