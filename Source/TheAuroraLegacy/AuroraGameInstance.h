@@ -20,8 +20,6 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 CurrentLevel = 1;
 
-    // Nombre real del nivel actual — se guarda en BeginPlay del GameMode
-    // Se usa para Reintentar sin depender de GetMapName() que tiene prefijos PIE
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     FName CurrentLevelName = FName("Level1_Drone");
 

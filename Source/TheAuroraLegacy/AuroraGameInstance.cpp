@@ -19,15 +19,13 @@ void UAuroraGameInstance::ResetStats()
     Score = 0;
     Lives = 3;
     CurrentLevel = 1;
-    CurrentLevelName = FName("Level1_Drone");
+    CurrentLevelName = FName("Lore_Fase1");
     UE_LOG(LogTemp, Warning, TEXT("Stats reiniciados"));
 }
 
 void UAuroraGameInstance::SaveGame()
 {
-    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>(
-        UGameplayStatics::CreateSaveGameObject(
-            UAuroraSaveGame::StaticClass()));
+    UAuroraSaveGame* SaveData = Cast<UAuroraSaveGame>( UGameplayStatics::CreateSaveGameObject(UAuroraSaveGame::StaticClass()));
 
     SaveData->SavedScore = Score;
     SaveData->SavedLives = Lives;
@@ -46,7 +44,6 @@ void UAuroraGameInstance::LoadGame()
     {
         Score = SaveData->SavedScore;
         Lives = SaveData->SavedLives;
-        UE_LOG(LogTemp, Warning,
-            TEXT("Juego cargado! Score: %d"), Score);
+        UE_LOG(LogTemp, Warning, TEXT("Juego cargado! Score: %d"), Score);
     }
 }

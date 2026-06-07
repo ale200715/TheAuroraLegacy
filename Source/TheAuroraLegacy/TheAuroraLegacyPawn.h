@@ -64,9 +64,6 @@ private:
     UPROPERTY(Category = Pitch, EditAnywhere)
     float MaxSpeed;
 
-//    UPROPERTY(Category = Yaw, EditAnywhere)
-    //float MinSpeed;
-
     float CurrentForwardSpeed;
     float CurrentYawSpeed;
     float CurrentPitchSpeed;

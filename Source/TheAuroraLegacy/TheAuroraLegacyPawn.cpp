@@ -51,7 +51,7 @@ ATheAuroraLegacyPawn::ATheAuroraLegacyPawn()
     TurnSpeed = 50.f;
     MaxSpeed = 4000.f;
     CurrentForwardSpeed = 0.f;
-    Lives = 3;
+    Lives = 10;
     bCanFire = true;
 
     static ConstructorHelpers::FClassFinder<APlayerProjectile> ProjectileBP(TEXT("/Game/Player/BP_PlayerProjectile"));
@@ -149,6 +149,7 @@ void ATheAuroraLegacyPawn::TakeDamage_Ship(int32 DamageAmount)
         SetActorHiddenInGame(true);
         SetActorEnableCollision(false);
         SetActorTickEnabled(false);
+        
     }
 }
 void ATheAuroraLegacyPawn::ResetFire()

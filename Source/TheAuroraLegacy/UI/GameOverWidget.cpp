@@ -24,23 +24,15 @@ void UGameOverWidget::NativeConstruct()
         PC->SetInputMode(FInputModeUIOnly());
     }
 }
-
 void UGameOverWidget::SetupGameOver(int32 LevelWhenDied, int32 PhaseWhenDied,FName CurrentLevelName)
 {
     CurrentLevel = CurrentLevelName;
-
-    if (LevelText)
-    {
-        FString Text = FString::Printf( TEXT("Caíste en el Nivel %d"), LevelWhenDied);
-        LevelText->SetText(FText::FromString(Text));
-    }
-
+    
     if (GameOverMessage)
     {
         GameOverMessage->SetText(FText::FromString( GetMessageForPhase(PhaseWhenDied)));
     }
 }
-
 FString UGameOverWidget::GetMessageForPhase(int32 Phase)
 {
     switch (Phase)
@@ -69,8 +61,7 @@ FString UGameOverWidget::GetMessageForPhase(int32 Phase)
 
 void UGameOverWidget::OnRetryClicked()
 {
-    UE_LOG(LogTemp, Warning,
-        TEXT("Retrying level: %s"), *CurrentLevel.ToString());
+    UE_LOG(LogTemp, Warning, TEXT("Retrying level: %s"), *CurrentLevel.ToString());
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
@@ -82,7 +73,6 @@ void UGameOverWidget::OnRetryClicked()
 
 void UGameOverWidget::OnRestartClicked()
 {
-    // Reiniciar desde cero — resetear GameInstance completo
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance())) {
         GI->ResetStats();
     }
@@ -91,7 +81,7 @@ void UGameOverWidget::OnRestartClicked()
     if (PC)
     {
         PC->SetShowMouseCursor(false);
-        PC->SetInputMode(FInputModeGameOnly()); // ← esto falta
+        PC->SetInputMode(FInputModeGameOnly()); 
     }
 
     UGameplayStatics::OpenLevel(this, FName("Level1_Drone"));

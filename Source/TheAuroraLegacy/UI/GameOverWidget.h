@@ -9,10 +9,12 @@ class THEAURORALEGACY_API UGameOverWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    
     void SetupGameOver(
         int32 LevelWhenDied,
         int32 PhaseWhenDied,
         FName CurrentLevelName);
+
 
 protected:
     virtual void NativeConstruct() override;
@@ -24,11 +26,10 @@ protected:
     // Mensaje según la fase
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* GameOverMessage;
-
-    // Nivel donde murió
+    /*/
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* LevelText;
-
+   /*/
     // Botón reintentar
     UPROPERTY(meta = (BindWidget))
     class UButton* RetryButton;

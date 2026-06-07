@@ -21,13 +21,17 @@ void UMainMenuWidget::NativeConstruct()
 
 void UMainMenuWidget::OnPlayClicked()
 {
+    if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
+        GI->ResetStats();
+
     APlayerController* PC = GetWorld()->GetFirstPlayerController();
     if (PC)
     {
         PC->SetShowMouseCursor(false);
-        PC->SetInputMode(FInputModeGameOnly()); // ← esto falta
+        PC->SetInputMode(FInputModeGameOnly());
     }
 
+<<<<<<< HEAD
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(
         GetGameInstance()))
     {
@@ -35,6 +39,9 @@ void UMainMenuWidget::OnPlayClicked()
     }
 
     UGameplayStatics::OpenLevel(this, FName("Level1_Drone"));
+=======
+    UGameplayStatics::OpenLevel(this, FName("Lore_Fase1"));
+>>>>>>> c81aec3266a04ab31b48f323a9ba975e1613e877
 }
 
 void UMainMenuWidget::OnQuitClicked()
