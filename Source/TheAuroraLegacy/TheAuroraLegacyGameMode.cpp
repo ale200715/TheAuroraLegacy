@@ -21,6 +21,14 @@ void ATheAuroraLegacyGameMode::BeginPlay()
     if (UAuroraGameInstance* GI = Cast<UAuroraGameInstance>(GetGameInstance()))
     {
             FString MapName = GetWorld()->GetMapName();
+            int32 UnderscoreIdx;
+            if (MapName.StartsWith(TEXT("UEDPIE_"))) 
+            {
+                MapName.FindChar('_', UnderscoreIdx);
+				MapName = MapName.RightChop(UnderscoreIdx + 1);
+				MapName.FindChar('_', UnderscoreIdx);
+				MapName = MapName.RightChop(UnderscoreIdx + 1);
+            }
             GI->CurrentLevelName = FName(*MapName);
             UE_LOG(LogTemp, Warning,TEXT("GameMode: Nivel guardado en GI: %s"), *MapName);
     }

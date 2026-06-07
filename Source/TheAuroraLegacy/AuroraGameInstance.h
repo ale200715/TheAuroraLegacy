@@ -19,6 +19,7 @@ public:
 
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     int32 CurrentLevel = 1;
+
     UPROPERTY(BlueprintReadWrite, Category = "Stats")
     FName CurrentLevelName = FName("Level1_Drone");
 
